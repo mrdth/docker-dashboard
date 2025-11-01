@@ -28,23 +28,25 @@
 
 ---
 
-### Frontend Framework: React 18+
+### Frontend Framework: Vue 3 with Composition API
 
-**Decision**: Use React 18 with TypeScript for browser UI
+**Decision**: Use Vue 3 with TypeScript and Composition API for browser UI
 
 **Rationale**:
-- Industry standard for dashboard UIs
-- Excellent real-time update capability via hooks
-- Strong ecosystem for charts/metrics visualization (optional future enhancement)
-- Component reusability aligns with architecture principles
-- React Testing Library for testable components
+- Lighter weight than React, excellent for dashboard UIs
+- Composition API enables reactive state management with minimal boilerplate
+- Superior template syntax (less verbose than JSX)
+- Excellent real-time update capability via reactive refs and computed properties
+- Strong ecosystem for component libraries (shadcn-vue available)
+- Faster development cycle with hot module replacement (HMR) via Vite
+- Better TypeScript integration with fewer type gymnastics
 
 **Alternatives Considered**:
-- **Vue**: Lighter weight, similar capability, smaller ecosystem
-- **Svelte**: Best performance, smaller market adoption
+- **React 18**: Industry standard but more verbose, larger bundle size
+- **Svelte**: Best performance but smaller ecosystem for UI component libraries
 - **Plain HTML/CSS**: No component reusability, harder to maintain
 
-**Selected**: React 18 with TypeScript, emotion for styling
+**Selected**: Vue 3 with TypeScript, Composition API, Vite for build tooling
 
 ---
 
@@ -85,24 +87,73 @@
 
 ---
 
-### Testing Framework: Jest + React Testing Library
+### Build Tool: Vite
 
-**Decision**: Jest for unit/integration tests, React Testing Library for component testing
+**Decision**: Use Vite as the build tool and development server for frontend
 
 **Rationale**:
-- Jest: Industry standard for Node.js and React projects
-- React Testing Library: Tests user interactions, not implementation details
-- Supertest: REST API contract testing
-- Both support TypeScript natively
+- Lightning-fast development server with instant HMR
+- Native ES modules support in development (no bundling overhead)
+- Optimized production builds using Rollup
+- Excellent TypeScript support out-of-the-box
+- Smaller configuration footprint than Webpack
+- Perfect pairing with Vue 3
+- ~10x faster than traditional bundlers in development
+
+**Alternatives Considered**:
+- **Webpack**: Industry standard but slower, more configuration required
+- **Rollup**: Great for libraries, less developer experience for apps
+- **esbuild**: Extremely fast but less mature ecosystem
+
+**Selected**: Vite with Vue 3 plugin
+
+---
+
+### Component Library & Styling: shadcn-vue + Tailwind CSS
+
+**Decision**: Use shadcn-vue (Vue port of shadcn/ui) with Tailwind CSS for UI components and styling
+
+**Rationale**:
+- shadcn-vue: Copy-paste component library with beautiful, accessible components
+- Components are owned by the project (copy-based, not package-based)
+- Full customization without ejecting
+- Built on Radix Vue (headless components) and Tailwind CSS
+- Excellent for dashboard UIs (cards, tables, charts, forms)
+- Tailwind CSS provides utility-first styling (fast, consistent)
+- No additional CSS-in-JS runtime overhead
+- Excellent TypeScript support
+
+**Alternatives Considered**:
+- **Material UI**: Heavy, more components, steeper learning curve
+- **Headless UI**: More manual component building required
+- **Plain Tailwind**: Less pre-built components, more code needed
+- **Emotion (CSS-in-JS)**: Runtime overhead, not ideal for dashboards
+
+**Selected**: shadcn-vue components + Tailwind CSS
+
+---
+
+### Testing Framework: Vitest + Vue Test Utils
+
+**Decision**: Vitest for all test types (unit, integration, component), Vue Test Utils for component testing
+
+**Rationale**:
+- Vitest: Modern alternative to Jest, faster, excellent Vite integration
+- Single test runner across backend and frontend (consistency)
+- Vue Test Utils: Official Vue testing library, native Vue component support
+- Supertest: REST API contract testing (unchanged)
+- All support TypeScript natively with minimal configuration
+- Vitest provides instant feedback with watch mode
+- Faster test execution via esbuild/rollup
 
 **Test Strategy**:
 - **Unit Tests**: Service logic (Docker integration, metrics calculation)
 - **Integration Tests**: Docker API integration, metrics aggregation
 - **Contract Tests**: API endpoint validation (Supertest)
-- **Component Tests**: React components (React Testing Library)
+- **Component Tests**: Vue components (Vue Test Utils)
 - **All tests**: Run before implementation (Test-First principle)
 
-**Selected**: Jest + React Testing Library + Supertest
+**Selected**: Vitest + Vue Test Utils + Supertest
 
 ---
 
@@ -259,7 +310,7 @@
   "dotenv": "^16.x",
   "winston": "^3.x",
   "typescript": "^5.x",
-  "jest": "^29.x",
+  "vitest": "^1.x",
   "supertest": "^6.x"
 }
 ```
@@ -267,12 +318,35 @@
 ### Frontend
 ```json
 {
-  "react": "^18.x",
+  "vue": "^3.4.x",
+  "vite": "^5.x",
   "typescript": "^5.x",
-  "emotion": "^11.x",
-  "react-testing-library": "^14.x",
-  "jest": "^29.x"
+  "tailwindcss": "^3.x",
+  "shadcn-vue": "^0.1.x",
+  "radix-vue": "^1.x",
+  "vitest": "^1.x",
+  "@vue/test-utils": "^2.x"
 }
+```
+
+### Vite Config (Frontend)
+```typescript
+// vite.config.ts
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+
+export default defineConfig({
+  plugins: [vue()],
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true
+      }
+    }
+  }
+})
 ```
 
 ---

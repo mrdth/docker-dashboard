@@ -11,19 +11,21 @@ Build a web-based dashboard for Docker container management and monitoring. The 
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.x / Node.js 20+ (backend), React 18+ (frontend)  
+**Language/Version**: TypeScript 5.x / Node.js 20+ (backend), Vue 3.4+ (frontend)  
 **Primary Dependencies**: 
-- Backend: Express.js (REST API + WebSocket), Docker SDK (node package), dotenv
-- Frontend: React, WebSocket client, CSS-in-JS (emotion or styled-components)  
+- Backend: Express.js (REST API + WebSocket), Docker SDK (dockerode), dotenv, Winston (logging)
+- Frontend: Vue 3 (Composition API), Vite (build tool), Tailwind CSS, shadcn-vue (component library)
 **Storage**: N/A (no persistence; metrics are real-time only)  
-**Testing**: Jest (unit/integration), React Testing Library (component tests), Supertest (API contract tests)  
+**Testing**: Vitest (unit/integration/component), Vue Test Utils (Vue components), Supertest (API contract tests)  
+**Build Tool**: Vite 5.x with Vue 3 plugin (frontend); Node.js/TypeScript (backend)  
 **Target Platform**: Web application (modern browsers: Chrome, Firefox, Safari, Edge)  
 **Project Type**: Web application (separate backend + frontend)  
 **Performance Goals**: 
-- Dashboard loads in <3 seconds (50+ containers)
+- Dashboard loads in <3 seconds (50+ containers) with Vite's optimized builds
 - Metrics update every 10 seconds via WebSocket
 - Searches return results in <1 second
-- 95th percentile API latency <200ms  
+- 95th percentile API latency <200ms
+- Vite HMR for instant development feedback  
 **Constraints**: 
 - Optimized for up to 100 containers
 - No historical data storage (current metrics only)

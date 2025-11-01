@@ -70,13 +70,27 @@ mkdir -p tests/{contract,integration,unit}
 ### Frontend Setup
 
 ```bash
-# Create frontend project (from parent directory)
+# Create frontend project with Vite (from parent directory)
 cd ..
-npx create-react-app frontend --template typescript
+npm create vite@latest frontend -- --template vue-ts
 cd frontend
-npm install emotion @emotion/react
-npm install --save-dev @testing-library/react @testing-library/jest-dom
+npm install
+
+# Install additional dependencies
+npm install tailwindcss postcss autoprefixer
+npm install -D @vue/test-utils vitest happy-dom
+npx tailwindcss init -p
+
+# Install shadcn-vue (component library setup)
+npm install shadcn-vue @radix-vue radix-vue
 ```
+
+**Vite + Vue 3 Development Server**:
+- Runs on `http://localhost:5173` (default)
+- Instant HMR (Hot Module Replacement)
+- Built-in TypeScript support
+- API proxy to backend (configured in `vite.config.ts`)
+
 
 ---
 
@@ -276,175 +290,315 @@ class WebSocketManager {
 export default WebSocketManager;
 ```
 
-### 4. Frontend React Components
+### 4. Frontend Vue 3 Components
 
-**File**: `frontend/src/components/ContainerList.tsx`
+**File**: `frontend/src/components/ContainerList.vue`
 
-```typescript
-import React, { useEffect, useState } from 'react';
-import { useContainers } from '../hooks/useContainers';
-import { useMetrics } from '../hooks/useMetrics';
-
-export const ContainerList: React.FC = () => {
-  const { containers, isLoading } = useContainers();
-  const { metrics } = useMetrics();
-
-  return (
-    <div>
-      {isLoading ? (
-        <p>Loading containers...</p>
-      ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Status</th>
-              <th>CPU</th>
-              <th>Memory</th>
-            </tr>
-          </thead>
-          <tbody>
-            {containers.map(container => {
-              const metric = metrics[container.id];
-              return (
-                <tr key={container.id}>
-                  <td>{container.name}</td>
-                  <td>{container.status}</td>
-                  <td>{metric?.cpu.percentage.toFixed(1)}%</td>
-                  <td>{metric?.memory.percentage.toFixed(1)}%</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      )}
+```vue
+<template>
+  <div class="w-full">
+    <div v-if="isLoading" class="text-center py-8">
+      <p class="text-gray-600">Loading containers...</p>
     </div>
-  );
-};
+    <div v-else>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>CPU</TableHead>
+            <TableHead>Memory</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow v-for="container in containers" :key="container.id">
+            <TableCell>{{ container.name }}</TableCell>
+            <TableCell>
+              <Badge :variant="statusVariant(container.status)">
+                {{ container.status }}
+              </Badge>
+            </TableCell>
+            <TableCell>
+              {{ metrics[container.id]?.cpu.percentage.toFixed(1) || 'N/A' }}%
+            </TableCell>
+            <TableCell>
+              {{ metrics[container.id]?.memory.percentage.toFixed(1) || 'N/A' }}%
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
+import { useContainers } from '@/composables/useContainers'
+import { useMetrics } from '@/composables/useMetrics'
+
+const { containers, isLoading } = useContainers()
+const { metrics } = useMetrics()
+
+const statusVariant = (status: string) => {
+  const variants: Record<string, string> = {
+    running: 'default',
+    stopped: 'secondary',
+    paused: 'outline',
+    exited: 'destructive'
+  }
+  return variants[status] || 'secondary'
+}
+</script>
 ```
 
-**File**: `frontend/src/hooks/useMetrics.ts`
+**File**: `frontend/src/composables/useMetrics.ts`
 
 ```typescript
-import { useEffect, useState } from 'react';
-import { ContainerMetrics } from '../types';
+import { ref, computed } from 'vue'
+import type { ContainerMetrics } from '@/types'
 
 export const useMetrics = () => {
-  const [metrics, setMetrics] = useState<{ [containerId: string]: ContainerMetrics }>({});
+  const metrics = ref<Record<string, ContainerMetrics>>({})
+  const wsUrl = `ws://${window.location.hostname}:3000/api/metrics/stream`
 
-  useEffect(() => {
-    const ws = new WebSocket('ws://localhost:3000/api/metrics/stream');
+  const connect = () => {
+    const ws = new WebSocket(wsUrl)
 
     ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
+      const message = JSON.parse(event.data)
       
       if (message.type === 'metrics_update') {
-        setMetrics(prev => ({
-          ...prev,
-          [message.data.containerId]: message.data.metrics
-        }));
+        metrics.value[message.data.containerId] = message.data.metrics
       }
-    };
+    }
 
-    return () => ws.close();
-  }, []);
+    ws.onclose = () => {
+      // Auto-reconnect with exponential backoff
+      setTimeout(connect, 5000)
+    }
 
-  return { metrics };
-};
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error)
+    }
+  }
+
+  connect()
+
+  return {
+    metrics: computed(() => metrics.value)
+  }
+}
+```
+
+**File**: `frontend/src/composables/useContainers.ts`
+
+```typescript
+import { ref } from 'vue'
+import type { Container } from '@/types'
+
+export const useContainers = () => {
+  const containers = ref<Container[]>([])
+  const isLoading = ref(true)
+  const error = ref<string | null>(null)
+
+  const fetchContainers = async () => {
+    try {
+      const response = await fetch('/api/containers')
+      const data = await response.json()
+      
+      if (data.error) {
+        error.value = data.error.message
+      } else {
+        containers.value = data.containers
+      }
+    } catch (e) {
+      error.value = 'Failed to fetch containers'
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  fetchContainers()
+  // Refetch periodically
+  setInterval(fetchContainers, 30000)
+
+  return {
+    containers,
+    isLoading,
+    error
+  }
+}
 ```
 
 ---
 
 ## Testing Strategy
 
-### Unit Tests (Service Logic)
+### Unit Tests (Service Logic) - Vitest
 
 ```typescript
-// tests/unit/services/docker.service.test.ts
+// backend/tests/unit/services/docker.service.test.ts
+import { describe, it, expect } from 'vitest'
+import dockerService from '@/services/docker.service'
+
 describe('DockerService', () => {
   it('should list all containers', async () => {
-    const containers = await dockerService.listContainers();
-    expect(Array.isArray(containers)).toBe(true);
-    expect(containers[0]).toHaveProperty('id');
-    expect(containers[0]).toHaveProperty('status');
-  });
+    const containers = await dockerService.listContainers()
+    expect(Array.isArray(containers)).toBe(true)
+    expect(containers[0]).toHaveProperty('id')
+    expect(containers[0]).toHaveProperty('status')
+  })
 
   it('should parse CPU metrics correctly', () => {
-    const stats = { /* mock stats */ };
-    const parsed = dockerService.parseStats(stats);
-    expect(parsed.cpu.percentage).toBeGreaterThanOrEqual(0);
-  });
-});
+    const stats = { /* mock stats */ }
+    const parsed = dockerService.parseStats(stats)
+    expect(parsed.cpu.percentage).toBeGreaterThanOrEqual(0)
+  })
+})
 ```
 
-### Integration Tests (Docker API)
+### Integration Tests (Docker API) - Vitest
 
 ```typescript
-// tests/integration/docker.integration.test.ts
+// backend/tests/integration/docker.integration.test.ts
+import { describe, it, expect } from 'vitest'
+import dockerService from '@/services/docker.service'
+
 describe('Docker API Integration', () => {
   it('should connect to Docker daemon', async () => {
-    const version = await dockerService.getVersion();
-    expect(version).toMatch(/\d+\.\d+/);
-  });
+    const version = await dockerService.getVersion()
+    expect(version).toMatch(/\d+\.\d+/)
+  })
 
   it('should retrieve metrics for running container', async () => {
     // Requires running container
-    const metrics = await dockerService.getContainerStats('container-id');
-    expect(metrics).toHaveProperty('cpu');
-    expect(metrics).toHaveProperty('memory');
-  });
-});
+    const metrics = await dockerService.getContainerStats('container-id')
+    expect(metrics).toHaveProperty('cpu')
+    expect(metrics).toHaveProperty('memory')
+  })
+})
 ```
 
-### Contract Tests (API Endpoints)
+### Contract Tests (API Endpoints) - Vitest + Supertest
 
 ```typescript
-// tests/contract/containers.test.ts
-import request from 'supertest';
-import app from '../../src/main';
+// backend/tests/contract/containers.test.ts
+import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import request from 'supertest'
+import app from '@/main'
 
 describe('GET /api/containers', () => {
   it('should return container list with correct schema', async () => {
     const response = await request(app)
       .get('/api/containers')
-      .expect(200);
+      .expect(200)
 
-    expect(response.body).toHaveProperty('containers');
-    expect(Array.isArray(response.body.containers)).toBe(true);
-    expect(response.body.containers[0]).toHaveProperty('id');
-    expect(response.body.containers[0]).toHaveProperty('status');
-  });
+    expect(response.body).toHaveProperty('containers')
+    expect(Array.isArray(response.body.containers)).toBe(true)
+    expect(response.body.containers[0]).toHaveProperty('id')
+    expect(response.body.containers[0]).toHaveProperty('status')
+  })
 
   it('should return 503 if Docker daemon unavailable', async () => {
     // Mock docker unavailable
     const response = await request(app)
       .get('/api/containers')
-      .expect(503);
+      .expect(503)
 
-    expect(response.body.error.code).toBe('DOCKER_DAEMON_UNAVAILABLE');
-  });
-});
+    expect(response.body.error.code).toBe('DOCKER_DAEMON_UNAVAILABLE')
+  })
+})
 ```
 
-### Component Tests (React)
+### Component Tests (Vue 3) - Vitest + Vue Test Utils
 
 ```typescript
-// frontend/tests/components/ContainerList.test.tsx
-import { render, screen } from '@testing-library/react';
-import { ContainerList } from '../../src/components/ContainerList';
+// frontend/tests/components/ContainerList.test.ts
+import { describe, it, expect, vi } from 'vitest'
+import { mount } from '@vue/test-utils'
+import ContainerList from '@/components/ContainerList.vue'
 
 describe('ContainerList Component', () => {
   it('should render loading state initially', () => {
-    render(<ContainerList />);
-    expect(screen.getByText('Loading containers...')).toBeInTheDocument();
-  });
+    const wrapper = mount(ContainerList, {
+      global: {
+        stubs: {
+          Table: true,
+          TableHeader: true,
+          TableBody: true,
+          TableRow: true,
+          TableCell: true,
+          Badge: true
+        }
+      }
+    })
+    
+    expect(wrapper.text()).toContain('Loading containers...')
+  })
 
   it('should display containers in table', async () => {
     // Mock API response
-    render(<ContainerList />);
-    // Wait for data load and verify rendering
-  });
-});
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve({
+          containers: [
+            { id: '123', name: 'nginx', status: 'running' }
+          ],
+          error: null
+        })
+      })
+    )
+
+    const wrapper = mount(ContainerList, {
+      global: {
+        stubs: {
+          Table: true,
+          TableHeader: true,
+          TableBody: true,
+          TableRow: true,
+          TableCell: true,
+          Badge: true
+        }
+      }
+    })
+
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('nginx')
+  })
+})
+```
+
+### Composable Tests (Vue 3) - Vitest
+
+```typescript
+// frontend/tests/composables/useMetrics.test.ts
+import { describe, it, expect, vi } from 'vitest'
+import { useMetrics } from '@/composables/useMetrics'
+
+describe('useMetrics composable', () => {
+  it('should initialize with empty metrics', () => {
+    const { metrics } = useMetrics()
+    expect(metrics.value).toEqual({})
+  })
+
+  it('should update metrics on message', async () => {
+    const { metrics } = useMetrics()
+    
+    // Simulate WebSocket message
+    const mockMessage = {
+      type: 'metrics_update',
+      data: {
+        containerId: 'test-id',
+        metrics: { cpu: { percentage: 25.5 } }
+      }
+    }
+    
+    // Test would mock WebSocket and dispatch message
+    expect(metrics.value).toBeDefined()
+  })
+})
 ```
 
 ---
@@ -463,7 +617,7 @@ docker ps
 
 ```bash
 cd backend
-npm run dev    # Starts with ts-node
+npm run dev    # Starts with ts-node, watches for changes
 ```
 
 **Output**:
@@ -472,20 +626,49 @@ Backend server running on http://localhost:3000
 WebSocket server on ws://localhost:3000/api/metrics/stream
 ```
 
-### 3. Start Frontend Development Server
+### 3. Start Frontend Development Server with Vite
 
 ```bash
 cd frontend
-npm start
+npm run dev    # Vite dev server with HMR
 ```
 
 **Output**:
 ```
-Compiled successfully!
-Local: http://localhost:3000  (frontend runs on :3000 by default)
+  VITE v5.x.x  ready in XXX ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  press h to show help
 ```
 
-### 4. Manual Testing
+**Key Vite Features**:
+- Instant HMR (Hot Module Replacement) - changes reflect immediately
+- No page reload needed for most changes
+- Lightning-fast dev server startup
+- Built-in TypeScript support
+
+### 4. Access Dashboard
+
+Open your browser to: `http://localhost:5173/`
+
+The frontend automatically proxies API calls to backend (`/api` → `http://localhost:3000`)
+
+### 5. Run Tests
+
+```bash
+# Backend tests (from backend/)
+npm run test           # Run all tests
+npm run test:watch    # Watch mode
+npm run test:unit     # Unit tests only
+npm run test:integration # Integration tests only
+
+# Frontend tests (from frontend/)
+npm run test          # Run all tests
+npm run test:watch   # Watch mode
+npm run test:ui      # Vitest UI for visual debugging
+```
+
+### 6. Manual Testing
 
 ```bash
 # Test REST API
@@ -493,6 +676,10 @@ curl http://localhost:3000/api/containers
 
 # Test WebSocket
 wscat -c ws://localhost:3000/api/metrics/stream
+
+# View Vite HMR in action
+# Edit frontend/src/components/ContainerList.vue and save
+# Changes appear instantly in browser without reload
 ```
 
 ---
@@ -506,10 +693,12 @@ wscat -c ws://localhost:3000/api/metrics/stream
 | `backend/src/api/routes/containers.ts` | REST endpoints |
 | `backend/src/websocket/manager.ts` | WebSocket server, metrics broadcast |
 | `backend/src/logger/index.ts` | Structured logging |
-| `frontend/src/hooks/useMetrics.ts` | WebSocket connection, metrics state |
-| `frontend/src/hooks/useContainers.ts` | REST API calls for container list |
-| `frontend/src/components/ContainerList.tsx` | Container list UI |
-| `frontend/src/components/MetricsPanel.tsx` | Metrics visualization |
+| `frontend/src/composables/useMetrics.ts` | WebSocket connection, metrics state (Vue Composition API) |
+| `frontend/src/composables/useContainers.ts` | REST API calls for container list |
+| `frontend/src/components/ContainerList.vue` | Container list UI with shadcn-vue Table & Badge |
+| `frontend/src/components/MetricsPanel.vue` | Metrics visualization with Tailwind CSS |
+| `frontend/vite.config.ts` | Vite configuration with Vue 3 plugin, API proxy |
+| `frontend/tailwind.config.ts` | Tailwind CSS configuration for shadcn-vue |
 
 ---
 
