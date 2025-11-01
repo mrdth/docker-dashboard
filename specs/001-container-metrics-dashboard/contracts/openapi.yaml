@@ -1,0 +1,524 @@
+openapi: 3.0.0
+info:
+  title: Docker Container Metrics Dashboard API
+  version: 1.0.0
+  description: REST API for Docker Container Metrics Dashboard
+  contact:
+    name: API Support
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:3000
+    description: Local development
+  - url: https://docker-dashboard.example.com
+    description: Production
+
+paths:
+  /api/health:
+    get:
+      summary: Health check endpoint
+      operationId: healthCheck
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service unavailable (Docker daemon not responding)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/containers:
+    get:
+      summary: List all Docker containers
+      operationId: listContainers
+      tags:
+        - Containers
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [running, stopped, paused, exited]
+          description: Filter by container status
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by container name (partial match)
+      responses:
+        '200':
+          description: List of containers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContainerListResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Docker daemon unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/containers/{containerId}:
+    get:
+      summary: Get container details with metrics, ports, logs, and image info
+      operationId: getContainer
+      tags:
+        - Containers
+      parameters:
+        - name: containerId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Container ID or name
+      responses:
+        '200':
+          description: Container details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContainerDetailResponse'
+        '404':
+          description: Container not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Docker daemon unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/containers/{containerId}/metrics:
+    get:
+      summary: Get current metrics for a container
+      operationId: getContainerMetrics
+      tags:
+        - Metrics
+      parameters:
+        - name: containerId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Container ID
+      responses:
+        '200':
+          description: Container metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsResponse'
+        '404':
+          description: Container not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Metrics unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Container:
+      type: object
+      required:
+        - id
+        - name
+        - status
+        - created
+        - image
+      properties:
+        id:
+          type: string
+          description: Container ID (SHA256)
+          example: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
+        name:
+          type: string
+          description: Container name
+          example: "nginx-prod"
+        status:
+          type: string
+          enum: [running, stopped, paused, exited]
+          description: Current container status
+        created:
+          type: string
+          format: date-time
+          description: When container was created
+        started:
+          type: string
+          format: date-time
+          nullable: true
+          description: When container was last started
+        image:
+          type: string
+          description: Image name and tag
+          example: "nginx:1.25"
+        exitCode:
+          type: integer
+          nullable: true
+          description: Exit code (only if status is exited)
+        command:
+          type: string
+          nullable: true
+          description: Container CMD/entrypoint
+        labels:
+          type: object
+          additionalProperties:
+            type: string
+          description: Docker labels
+
+    ContainerMetrics:
+      type: object
+      required:
+        - containerId
+        - timestamp
+        - cpu
+        - memory
+        - diskIo
+        - networkIo
+        - status
+      properties:
+        containerId:
+          type: string
+          description: Container ID
+        timestamp:
+          type: string
+          format: date-time
+          description: When metrics were sampled
+        cpu:
+          type: object
+          required:
+            - percentage
+          properties:
+            percentage:
+              type: number
+              format: double
+              description: CPU usage percentage (can exceed 100% on multi-core)
+              example: 25.5
+        memory:
+          type: object
+          required:
+            - bytes
+            - percentage
+          properties:
+            bytes:
+              type: integer
+              format: int64
+              description: Memory usage in bytes
+              example: 536870912
+            percentage:
+              type: number
+              format: double
+              description: Memory usage percentage (0-100)
+              example: 50.0
+        memoryLimit:
+          type: integer
+          format: int64
+          description: System memory limit in bytes
+          example: 1073741824
+        diskIo:
+          type: object
+          required:
+            - readBytes
+            - writeBytes
+            - readBytesPerSec
+            - writeBytesPerSec
+          properties:
+            readBytes:
+              type: integer
+              format: int64
+              description: Total bytes read
+            writeBytes:
+              type: integer
+              format: int64
+              description: Total bytes written
+            readBytesPerSec:
+              type: number
+              format: double
+              description: Read throughput (bytes/sec)
+            writeBytesPerSec:
+              type: number
+              format: double
+              description: Write throughput (bytes/sec)
+        networkIo:
+          type: object
+          required:
+            - receivedBytes
+            - sentBytes
+            - receivedBytesPerSec
+            - sentBytesPerSec
+          properties:
+            receivedBytes:
+              type: integer
+              format: int64
+              description: Total bytes received
+            sentBytes:
+              type: integer
+              format: int64
+              description: Total bytes sent
+            receivedBytesPerSec:
+              type: number
+              format: double
+              description: Receive throughput (bytes/sec)
+            sentBytesPerSec:
+              type: number
+              format: double
+              description: Send throughput (bytes/sec)
+        status:
+          type: string
+          enum: [available, unavailable]
+          description: Metrics availability status
+
+    Port:
+      type: object
+      required:
+        - containerId
+        - protocol
+        - containerPort
+        - hostPort
+      properties:
+        containerId:
+          type: string
+          description: Container ID
+        protocol:
+          type: string
+          enum: [tcp, udp]
+          description: Transport protocol
+        containerPort:
+          type: integer
+          format: int32
+          description: Port inside container (1-65535)
+          minimum: 1
+          maximum: 65535
+        hostPort:
+          type: integer
+          format: int32
+          description: Mapped port on host (1-65535)
+          minimum: 1
+          maximum: 65535
+        hostIp:
+          type: string
+          nullable: true
+          description: Host IP or "0.0.0.0" for any interface
+          example: "127.0.0.1"
+
+    LogEntry:
+      type: object
+      required:
+        - containerId
+        - timestamp
+        - sequence
+        - message
+        - stream
+      properties:
+        containerId:
+          type: string
+          description: Container ID
+        timestamp:
+          type: string
+          format: date-time
+          description: When log line was generated
+        sequence:
+          type: integer
+          format: int64
+          description: Log line sequence number
+        message:
+          type: string
+          maxLength: 4096
+          description: Log message content
+        stream:
+          type: string
+          enum: [stdout, stderr]
+          description: Log stream (stdout or stderr)
+
+    Image:
+      type: object
+      required:
+        - name
+        - tag
+        - currentVersion
+      properties:
+        name:
+          type: string
+          description: Image repository name
+          example: "nginx"
+        tag:
+          type: string
+          description: Image tag
+          example: "1.25"
+        digest:
+          type: string
+          nullable: true
+          description: Full image digest (SHA256)
+        currentVersion:
+          type: string
+          description: Current image version/tag
+        latestVersion:
+          type: string
+          nullable: true
+          description: Latest available version from registry
+        updateAvailable:
+          type: boolean
+          description: Whether update is available
+        lastChecked:
+          type: string
+          format: date-time
+          nullable: true
+          description: When update check was performed
+        registryStatus:
+          type: string
+          enum: [checked, unable_to_check, private_registry]
+          description: Status of registry check
+
+    ContainerListResponse:
+      type: object
+      required:
+        - containers
+      properties:
+        containers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Container'
+        error:
+          $ref: '#/components/schemas/Error'
+          nullable: true
+
+    ContainerDetailResponse:
+      type: object
+      required:
+        - container
+      properties:
+        container:
+          type: object
+          required:
+            - id
+            - name
+            - status
+            - created
+            - image
+            - metrics
+            - ports
+            - logs
+            - imageInfo
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            status:
+              type: string
+            created:
+              type: string
+              format: date-time
+            started:
+              type: string
+              format: date-time
+              nullable: true
+            image:
+              type: string
+            metrics:
+              $ref: '#/components/schemas/ContainerMetrics'
+            ports:
+              type: array
+              items:
+                $ref: '#/components/schemas/Port'
+            logs:
+              type: array
+              items:
+                $ref: '#/components/schemas/LogEntry'
+            imageInfo:
+              $ref: '#/components/schemas/Image'
+        error:
+          $ref: '#/components/schemas/Error'
+          nullable: true
+
+    MetricsResponse:
+      type: object
+      required:
+        - metrics
+      properties:
+        metrics:
+          $ref: '#/components/schemas/ContainerMetrics'
+        error:
+          $ref: '#/components/schemas/Error'
+          nullable: true
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - dockerVersion
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+          description: Service health status
+        dockerVersion:
+          type: string
+          description: Docker API version
+          example: "1.40"
+        timestamp:
+          type: string
+          format: date-time
+          description: Health check timestamp
+        error:
+          $ref: '#/components/schemas/Error'
+          nullable: true
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Error code
+          example: "DOCKER_DAEMON_UNAVAILABLE"
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: string
+          nullable: true
+          description: Additional error context
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+
+tags:
+  - name: Health
+    description: Service health and status endpoints
+  - name: Containers
+    description: Container management and queries
+  - name: Metrics
+    description: Real-time metrics endpoints
