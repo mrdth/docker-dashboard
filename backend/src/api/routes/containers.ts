@@ -5,6 +5,7 @@
 
 import { Router, Request, Response, NextFunction } from "express";
 import { getDockerService } from "../../services/docker.service";
+import { getRegistryService } from "../../services/registry.service";
 import { DockerDaemonError, ContainerNotFoundError } from "../../models/errors";
 import { logError, log } from "../../logger/index";
 import { asyncHandler } from "../middleware/error-handler";
@@ -83,6 +84,28 @@ router.get(
                     name,
                     count: containers.length,
                 });
+            }
+
+            // Populate imageInfo for each container (from cache, won't block)
+            const registryService = getRegistryService();
+            for (const container of containers) {
+                try {
+                    container.imageInfo = await registryService.checkForUpdates(
+                        container.image,
+                    );
+                } catch (error) {
+                    // If imageInfo fails, just continue without it
+                    logError(
+                        "Failed to get imageInfo for container",
+                        error as Error,
+                        {
+                            service: "api",
+                            operation: "listContainers",
+                            containerId: container.id,
+                            image: container.image,
+                        },
+                    );
+                }
             }
 
             res.json({
