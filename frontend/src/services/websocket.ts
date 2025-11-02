@@ -6,9 +6,26 @@
 
 import type { WebSocketMessage } from "../types/index";
 
-const WS_URL =
-    (import.meta.env.VITE_WS_URL as string) ||
-    `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}`;
+/**
+ * Determine WebSocket URL based on environment
+ * In development, use same hostname as frontend but with port 3000 (backend)
+ * In production, use VITE_WS_URL env var
+ */
+function getWsUrl(): string {
+    const configUrl = import.meta.env.VITE_WS_URL as string;
+
+    if (configUrl) {
+        return configUrl;
+    }
+
+    // In development, use the same hostname but with backend port 3000
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const hostname = window.location.hostname;
+
+    return `${protocol}//${hostname}:3000`;
+}
+
+const WS_URL = getWsUrl();
 
 export type MessageHandler = (message: WebSocketMessage) => void;
 export type ConnectionHandler = () => void;

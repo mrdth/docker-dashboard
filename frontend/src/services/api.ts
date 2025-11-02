@@ -3,8 +3,26 @@
  * Provides fetch wrapper with error handling and CORS support
  */
 
-const API_URL =
-    (import.meta.env.VITE_API_URL as string) || "http://localhost:3000";
+/**
+ * Determine API URL based on environment
+ * In development, use same host as frontend but with port 3000
+ * In production, use VITE_API_URL env var
+ */
+function getApiUrl(): string {
+    const configUrl = import.meta.env.VITE_API_URL as string;
+
+    if (configUrl) {
+        return configUrl;
+    }
+
+    // In development, use the same hostname as the frontend but with port 3000
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+
+    return `${protocol}//${hostname}:3000`;
+}
+
+const API_URL = getApiUrl();
 
 export interface RequestOptions extends RequestInit {
     headers?: Record<string, string>;
