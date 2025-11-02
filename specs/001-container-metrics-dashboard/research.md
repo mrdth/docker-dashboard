@@ -1,7 +1,7 @@
 # Research: Docker Container Metrics Dashboard
 
-**Feature**: 001-container-metrics-dashboard  
-**Date**: 2025-11-01  
+**Feature**: 001-container-metrics-dashboard
+**Date**: 2025-11-01
 **Purpose**: Resolve technical unknowns and document design decisions for implementation
 
 ---
@@ -14,7 +14,7 @@
 
 **Rationale**:
 - Lightweight and widely adopted for REST APIs
-- Excellent WebSocket support (via ws library or Socket.IO)
+- Excellent WebSocket support (via express-ws library or Socket.IO)
 - Strong npm ecosystem for Docker SDK and utilities
 - Matches web application architecture requirement
 - Good performance for real-time metrics delivery
@@ -24,7 +24,7 @@
 - **Fastify**: Faster than Express but smaller ecosystem for Docker tooling
 - **Python/FastAPI**: Good choice but adds language context switch from TypeScript frontend
 
-**Selected**: Express.js with `express`, `ws` (WebSocket), `express-async-errors`
+**Selected**: Express.js with `express`, `express-ws` (WebSocket), `express-async-errors`
 
 ---
 
@@ -52,20 +52,22 @@
 
 ### Real-Time Delivery: WebSocket with REST Fallback
 
-**Decision**: WebSocket (ws) for real-time metrics, fallback to REST polling for incompatible browsers
+**Decision**: WebSocket (express-ws) for real-time metrics, fallback to REST polling for incompatible browsers
 
 **Rationale**:
 - Specification clarification Q1 requires real-time metric delivery
 - WebSocket provides sub-second latency for 10-second metric updates
 - Server-Sent Events (SSE) would be simpler but WebSocket has better browser support for bidirectional communication (future dashboard controls)
 - Explicit fallback to REST polling handles older browsers or restricted networks
+- `express-ws` is more idiomatic for Express applications: treats WebSocket routes like regular Express routes, supports middleware, reduces boilerplate
 
 **Implementation Strategy**:
-- Backend: Express server with `ws` library for WebSocket support
+- Backend: Express server with `express-ws` middleware for seamless WebSocket integration
 - Frontend: Automatic connection retry with exponential backoff
 - Error handling: Show error banner, auto-retry every 5 seconds (specification clarification Q2)
+- WebSocket endpoints defined as Express routes (cleaner than manual server setup)
 
-**Selected**: WebSocket (ws library) with REST API fallback
+**Selected**: WebSocket (express-ws) with REST API fallback
 
 ---
 
@@ -308,7 +310,7 @@
 ```json
 {
   "express": "^4.18.x",
-  "ws": "^8.x",
+  "express-ws": "^5.x",
   "dockerode": "^3.3.x",
   "dotenv": "^16.x",
   "winston": "^3.x",
@@ -366,7 +368,7 @@ export default defineConfig({
 - [Docker SDK for Node.js (dockerode)](https://github.com/apocas/dockerode) — Docker API integration
 - [Docker API Documentation](https://docs.docker.com/engine/api/) — Official Docker REST API spec
 - [Express.js Documentation](https://expressjs.com/) — HTTP server framework
-- [WebSocket Library (ws)](https://github.com/websockets/ws) — Real-time bidirectional communication
+- [express-ws Documentation](https://github.com/HenningM/express-ws) — WebSocket integration for Express
 
 **Frontend & State Management**:
 - [Vue 3 Documentation](https://vuejs.org/) — Progressive JavaScript framework

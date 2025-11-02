@@ -13,7 +13,7 @@
 
 **Language/Version**: TypeScript 5.x (Node.js 20+ backend, Vue 3 frontend)  
 **Primary Dependencies**: 
-- Backend: Express.js 4.18.x, dockerode 3.3.x, ws 8.x
+- Backend: Express.js 4.18.x, express-ws 5.x, dockerode 3.3.x
 - Frontend: Vue 3 3.4.x, Vite 5.x, Reka UI v2.x, Tailwind CSS 3.x
 **Storage**: N/A (real-time metrics only, no persistence)  
 **Testing**: Vitest 1.x + Vue Test Utils 2.x (frontend), Supertest 6.x (backend)  

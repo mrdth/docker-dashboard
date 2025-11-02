@@ -57,14 +57,14 @@ docker-dashboard/
 mkdir backend
 cd backend
 npm init -y
-npm install express ws dockerode dotenv winston
-npm install --save-dev typescript @types/express @types/node ts-node jest ts-jest
+npm install express express-ws dockerode dotenv winston
+npm install --save-dev typescript @types/express @types/express-ws @types/node ts-node vitest
 
 # Create directory structure
 mkdir -p src/{models,services,api/routes,api/middleware,websocket,logger}
 mkdir -p tests/{contract,integration,unit}
 
-# Create tsconfig.json and jest.config.js
+# Create tsconfig.json and vitest.config.ts
 ```
 
 ### Frontend Setup
@@ -206,89 +206,134 @@ export default router;
 
 ### 3. WebSocket Implementation (Real-Time Metrics)
 
-**File**: `backend/src/websocket/manager.ts`
+**File**: `backend/src/api/routes/metrics.ws.ts`
 
 ```typescript
-import { WebSocketServer } from 'ws';
-import dockerService from '../services/docker.service';
+import { Router } from 'express';
+import expressWs from 'express-ws';
+import dockerService from '../../services/docker.service';
+import logger from '../../logger';
 
-class WebSocketManager {
-  private wss: WebSocketServer;
-  private metricsInterval: NodeJS.Timeout;
+const router = Router();
+let metricsInterval: NodeJS.Timeout;
+const clients = new Set();
 
-  constructor(wss: WebSocketServer) {
-    this.wss = wss;
-    this.setupHandlers();
-    this.startMetricsCollection();
-  }
+// WebSocket route for metrics stream
+router.ws('/stream', (ws, req) => {
+  logger.info('WebSocket client connected');
+  clients.add(ws);
 
-  private setupHandlers() {
-    this.wss.on('connection', (ws) => {
-      logger.info('WebSocket client connected');
+  ws.on('message', (data) => {
+    try {
+      const message = JSON.parse(data.toString());
+      handleMessage(ws, message);
+    } catch (error) {
+      logger.error('Failed to parse WebSocket message', error);
+    }
+  });
+
+  ws.on('close', () => {
+    logger.info('WebSocket client disconnected');
+    clients.delete(ws);
+  });
+
+  ws.on('error', (error) => {
+    logger.error('WebSocket error', error);
+    clients.delete(ws);
+  });
+});
+
+async function startMetricsCollection() {
+  if (metricsInterval) clearInterval(metricsInterval);
+
+  metricsInterval = setInterval(async () => {
+    try {
+      const containers = await dockerService.listContainers();
       
-      ws.on('message', (data) => {
-        const message = JSON.parse(data);
-        this.handleMessage(ws, message);
-      });
-
-      ws.on('close', () => {
-        logger.info('WebSocket client disconnected');
-      });
-    });
-  }
-
-  private async startMetricsCollection() {
-    this.metricsInterval = setInterval(async () => {
-      try {
-        const containers = await dockerService.listContainers();
+      for (const container of containers) {
+        const metrics = await dockerService.getContainerStats(container.id);
         
-        for (const container of containers) {
-          const metrics = await dockerService.getContainerStats(container.id);
-          
-          this.broadcast({
-            type: 'metrics_update',
-            timestamp: new Date().toISOString(),
-            data: {
-              containerId: container.id,
-              metrics
-            }
-          });
-        }
-      } catch (error) {
-        this.broadcast({
-          type: 'docker_daemon_offline',
+        broadcast({
+          type: 'metrics_update',
           timestamp: new Date().toISOString(),
-          data: { error: { code: 'DOCKER_DAEMON_UNAVAILABLE' } }
+          data: {
+            containerId: container.id,
+            metrics
+          }
         });
       }
-    }, 10000); // Every 10 seconds
-  }
-
-  private broadcast(message: any) {
-    this.wss.clients.forEach(client => {
-      if (client.readyState === 1) { // OPEN
-        client.send(JSON.stringify(message));
-      }
-    });
-  }
-
-  private handleMessage(ws: any, message: any) {
-    switch (message.type) {
-      case 'ready':
-        ws.send(JSON.stringify({
-          type: 'connection_established',
-          timestamp: new Date().toISOString()
-        }));
-        break;
-      case 'get_containers':
-        // Handle client request
-        break;
+    } catch (error) {
+      logger.error('Metrics collection failed', error);
+      broadcast({
+        type: 'docker_daemon_offline',
+        timestamp: new Date().toISOString(),
+        data: { error: { code: 'DOCKER_DAEMON_UNAVAILABLE' } }
+      });
     }
+  }, 10000); // Every 10 seconds
+}
+
+function broadcast(message: any) {
+  const data = JSON.stringify(message);
+  clients.forEach(client => {
+    if (client.readyState === 1) { // WebSocket.OPEN
+      client.send(data);
+    }
+  });
+}
+
+function handleMessage(ws: any, message: any) {
+  switch (message.type) {
+    case 'ready':
+      ws.send(JSON.stringify({
+        type: 'connection_established',
+        timestamp: new Date().toISOString()
+      }));
+      startMetricsCollection();
+      break;
+    case 'get_containers':
+      dockerService.listContainers().then(containers => {
+        ws.send(JSON.stringify({
+          type: 'containers',
+          data: containers
+        }));
+      });
+      break;
   }
 }
 
-export default WebSocketManager;
+export default router;
 ```
+
+**File**: `backend/src/main.ts` (Express app setup)
+
+```typescript
+import express from 'express';
+import expressWs from 'express-ws';
+import metricsRoute from './api/routes/metrics.ws';
+
+const app = express();
+expressWs(app); // Enable WebSocket support on Express
+
+// REST API routes
+app.use('/api/containers', containerRoutes);
+// ... other REST routes
+
+// WebSocket routes
+app.use('/api/metrics', metricsRoute);
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  logger.info(`Server running on http://localhost:${PORT}`);
+  logger.info(`WebSocket endpoint: ws://localhost:${PORT}/api/metrics/stream`);
+});
+```
+
+**Key Benefits of express-ws**:
+- WebSocket routes defined like regular Express routes
+- Automatic integration with Express middleware
+- Cleaner separation of concerns (metrics route = single file)
+- No manual server setup or client management needed
 
 ### 4. Frontend Vue 3 Components
 
