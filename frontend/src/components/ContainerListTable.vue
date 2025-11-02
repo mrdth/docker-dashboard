@@ -33,6 +33,11 @@
                     >
                         Memory %
                     </th>
+                    <th
+                        class="px-6 py-3 text-center font-semibold text-gray-900"
+                    >
+                        Actions
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -85,6 +90,14 @@
                             type="memory"
                         />
                         <div v-else class="text-gray-400 text-sm">N/A</div>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <router-link
+                            :to="`/containers/${container.id}`"
+                            class="px-3 py-2 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors inline-block"
+                        >
+                            Details
+                        </router-link>
                     </td>
                 </tr>
             </tbody>

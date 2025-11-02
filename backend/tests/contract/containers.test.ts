@@ -221,6 +221,60 @@ describe("Container API Contracts", () => {
         });
     });
 
+    describe("GET /api/containers with filters - User Story 4", () => {
+        it("T118: GET /api/containers?name=nginx returns only containers matching name substring", async () => {
+            const response = await request(wsApp)
+                .get("/api/containers")
+                .query({ name: "test" })
+                .expect(200);
+
+            expect(response.body).toHaveProperty("containers");
+            expect(Array.isArray(response.body.containers)).toBe(true);
+
+            // All returned containers should have names containing the query
+            if (response.body.containers.length > 0) {
+                response.body.containers.forEach((container: any) => {
+                    expect(container.name.toLowerCase().includes("test")).toBe(
+                        true,
+                    );
+                });
+            }
+        });
+
+        it("T119: GET /api/containers?status=running returns only containers with status=running", async () => {
+            const response = await request(wsApp)
+                .get("/api/containers")
+                .query({ status: "running" })
+                .expect(200);
+
+            expect(response.body).toHaveProperty("containers");
+            expect(Array.isArray(response.body.containers)).toBe(true);
+
+            // All returned containers should have status=running
+            response.body.containers.forEach((container: any) => {
+                expect(container.status).toBe("running");
+            });
+        });
+
+        it("T120: GET /api/containers?name=nginx&status=running returns AND filter result", async () => {
+            const response = await request(wsApp)
+                .get("/api/containers")
+                .query({ name: "test", status: "running" })
+                .expect(200);
+
+            expect(response.body).toHaveProperty("containers");
+            expect(Array.isArray(response.body.containers)).toBe(true);
+
+            // All returned containers should match both filters
+            response.body.containers.forEach((container: any) => {
+                expect(container.name.toLowerCase().includes("test")).toBe(
+                    true,
+                );
+                expect(container.status).toBe("running");
+            });
+        });
+    });
+
     describe("GET /api/containers/{id} - User Story 3 Ports and Logs", () => {
         it("T097: includes ports array in response", async () => {
             const response = await request(wsApp)

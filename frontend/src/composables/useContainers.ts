@@ -3,13 +3,20 @@
  * Manages container list state, REST fetches, and WebSocket updates
  */
 
-import { ref, onMounted, Ref } from "vue";
+import { ref, onMounted, Ref, computed } from "vue";
 import { get } from "../services/api";
 import { getWebSocketConnection } from "../services/websocket";
 import type { Container, WebSocketMessage } from "../types/index";
 
+interface Filters {
+    name: string;
+    status: string;
+}
+
 interface UseContainersState {
     containers: Ref<Container[]>;
+    filteredContainers: Ref<Container[]>;
+    filters: Ref<Filters>;
     loading: Ref<boolean>;
     error: Ref<string | null>;
     lastUpdated: Ref<Date | null>;
@@ -19,11 +26,43 @@ export function useContainers(): UseContainersState & {
     fetchContainers: () => Promise<void>;
 } {
     const containers = ref<Container[]>([]);
+    const filters = ref<Filters>({
+        name: "",
+        status: "",
+    });
     const loading = ref(false);
     const error = ref<string | null>(null);
     const lastUpdated = ref<Date | null>(null);
 
     const ws = getWebSocketConnection();
+
+    /**
+     * T124: Computed filtered containers based on filters
+     * Applies name (substring, case-insensitive) and status filters
+     */
+    const filteredContainers = computed(() => {
+        return containers.value.filter((container) => {
+            // Filter by name (case-insensitive substring match)
+            if (
+                filters.value.name &&
+                !container.name
+                    .toLowerCase()
+                    .includes(filters.value.name.toLowerCase())
+            ) {
+                return false;
+            }
+
+            // Filter by status (exact match)
+            if (
+                filters.value.status &&
+                container.status !== filters.value.status
+            ) {
+                return false;
+            }
+
+            return true;
+        });
+    });
 
     /**
      * T066: Fetch containers from REST API with metrics
@@ -206,6 +245,8 @@ export function useContainers(): UseContainersState & {
 
     return {
         containers,
+        filteredContainers,
+        filters,
         loading,
         error,
         lastUpdated,

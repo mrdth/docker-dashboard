@@ -6,11 +6,11 @@
     "scripts": {
         "dev": "ts-node src/main.ts",
         "build": "tsc",
-        "test": "vitest",
-        "test:watch": "vitest --watch",
-        "test:unit": "vitest --include='tests/unit/**/*.test.ts'",
-        "test:integration": "vitest --include='tests/integration/**/*.test.ts'",
-        "test:contract": "vitest --include='tests/contract/**/*.test.ts'",
+        "test": "NODE_ENV=test vitest",
+        "test:watch": "NODE_ENV=test vitest --watch",
+        "test:unit": "NODE_ENV=test vitest tests/unit",
+        "test:integration": "NODE_ENV=test vitest tests/integration",
+        "test:contract": "NODE_ENV=test vitest tests/contract",
         "lint": "tsc --noEmit"
     },
     "keywords": [],

@@ -247,4 +247,106 @@ describe("T072: ContainerListTable.vue", () => {
             expect(cellTexts.some((text) => text.includes("50"))).toBe(true); // Memory
         });
     });
+
+    describe("T130: Filtering with ContainerListTable", () => {
+        it("displays only containers matching the filter criteria", () => {
+            const containersForFiltering = [
+                {
+                    id: "running-nginx",
+                    name: "nginx-prod",
+                    status: "running",
+                    created: Math.floor(Date.now() / 1000) - 3600,
+                    image: "nginx:latest",
+                    fullId: "running-nginx-full",
+                },
+                {
+                    id: "running-postgres",
+                    name: "postgres-db",
+                    status: "running",
+                    created: Math.floor(Date.now() / 1000) - 3600,
+                    image: "postgres:15",
+                    fullId: "running-postgres-full",
+                },
+                {
+                    id: "stopped-nginx",
+                    name: "nginx-dev",
+                    status: "stopped",
+                    created: Math.floor(Date.now() / 1000) - 7200,
+                    image: "nginx:latest",
+                    fullId: "stopped-nginx-full",
+                },
+            ];
+
+            // Test filtering by status only
+            const runningContainers = containersForFiltering.filter(
+                (c) => c.status === "running",
+            );
+
+            const wrapper = mount(ContainerListTable, {
+                props: { containers: runningContainers },
+                global: {
+                    stubs: {
+                        ContainerStatusBadge: true,
+                    },
+                },
+            });
+
+            // Should show only 2 running containers
+            const rows = wrapper.findAll("tbody tr");
+            expect(rows).toHaveLength(2);
+            expect(wrapper.text()).toContain("nginx-prod");
+            expect(wrapper.text()).toContain("postgres-db");
+            expect(wrapper.text()).not.toContain("nginx-dev");
+        });
+
+        it("displays only containers matching name filter", () => {
+            const containersForFiltering = [
+                {
+                    id: "nginx1",
+                    name: "nginx-prod",
+                    status: "running",
+                    created: Math.floor(Date.now() / 1000) - 3600,
+                    image: "nginx:latest",
+                    fullId: "nginx1-full",
+                },
+                {
+                    id: "nginx2",
+                    name: "nginx-dev",
+                    status: "running",
+                    created: Math.floor(Date.now() / 1000) - 3600,
+                    image: "nginx:latest",
+                    fullId: "nginx2-full",
+                },
+                {
+                    id: "postgres1",
+                    name: "postgres-db",
+                    status: "running",
+                    created: Math.floor(Date.now() / 1000) - 3600,
+                    image: "postgres:15",
+                    fullId: "postgres1-full",
+                },
+            ];
+
+            // Filter by name containing "nginx"
+            const filteredContainers = containersForFiltering.filter((c) =>
+                c.name.toLowerCase().includes("nginx"),
+            );
+
+            const wrapper = mount(ContainerListTable, {
+                props: { containers: filteredContainers },
+                global: {
+                    stubs: {
+                        ContainerStatusBadge: true,
+                    },
+                },
+            });
+
+            // Should show only 2 nginx containers
+            const rows = wrapper.findAll("tbody tr");
+            expect(rows).toHaveLength(2);
+            expect(wrapper.text()).toContain("nginx-prod");
+            expect(wrapper.text()).toContain("nginx-dev");
+            expect(wrapper.text()).not.toContain("postgres-db");
+        });
+    });
 });

@@ -24,14 +24,24 @@
             <!-- Loading State -->
             <LoadingSpinner v-if="loading" />
 
+            <!-- Filters Section -->
+            <ContainerFilters
+                v-if="!loading"
+                :model-value="filters"
+                @update:filters="filters = $event"
+            />
+
             <!-- Container List or Empty State -->
-            <div v-else class="bg-white rounded-lg shadow">
-                <ContainerEmptyState v-if="containers.length === 0" />
-                <ContainerListTable v-else :containers="containers" />
+            <div v-if="!loading" class="bg-white rounded-lg shadow">
+                <ContainerEmptyState v-if="filteredContainers.length === 0" />
+                <ContainerListTable v-else :containers="filteredContainers" />
             </div>
 
             <!-- Last Updated -->
-            <div v-if="lastUpdated" class="mt-4 text-sm text-gray-600">
+            <div
+                v-if="lastUpdated && !loading"
+                class="mt-4 text-sm text-gray-600"
+            >
                 Last updated: {{ formatTime(lastUpdated!) }}
             </div>
         </div>
@@ -43,15 +53,18 @@ import { ref, onErrorCaptured } from "vue";
 import { useContainers } from "../composables/useContainers";
 import ContainerListTable from "../components/ContainerListTable.vue";
 import ContainerEmptyState from "../components/ContainerEmptyState.vue";
+import ContainerFilters from "../components/ContainerFilters.vue";
 import ErrorBanner from "../components/ErrorBanner.vue";
 import LoadingSpinner from "../components/LoadingSpinner.vue";
 
 /**
  * T065: Dashboard page component
- * Displays container list with real-time updates
+ * Displays container list with real-time updates and filtering
  */
 const {
     containers,
+    filteredContainers,
+    filters,
     loading,
     error: composableError,
     lastUpdated,

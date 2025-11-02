@@ -186,7 +186,9 @@ process.on("unhandledRejection", (reason: unknown) => {
     process.exit(1);
 });
 
-// Start the server
-startServer();
+// Start the server only if this module is being run directly (not imported for tests)
+if (process.env.NODE_ENV !== "test") {
+    startServer();
+}
 
 export default wsApp;
