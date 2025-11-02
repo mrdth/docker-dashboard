@@ -57,8 +57,8 @@ docker-dashboard/
 mkdir backend
 cd backend
 npm init -y
-npm install express express-ws dockerode dotenv winston
-npm install --save-dev typescript @types/express @types/express-ws @types/node ts-node vitest
+npm install express@5.1.0 express-ws@5.0.2 dockerode@4.0.9 dotenv@17.2.3 winston@3.18.3
+npm install --save-dev typescript@5.9.3 @types/express @types/express-ws @types/node ts-node vitest@4.0.6 supertest@7.1.4
 
 # Create directory structure
 mkdir -p src/{models,services,api/routes,api/middleware,websocket,logger}
@@ -76,13 +76,14 @@ npm create vite@latest frontend -- --template vue-ts
 cd frontend
 npm install
 
-# Install additional dependencies
-npm install tailwindcss postcss autoprefixer
-npm install -D @vue/test-utils vitest happy-dom
+# Install additional dependencies (latest versions)
+npm install vue@3.5.13 vite@7.1.12 typescript@5.9.3
+npm install tailwindcss@4.1.4 postcss@8.5.3 autoprefixer@10.4.21
+npm install -D @vue/test-utils@2.4.6 vitest@4.0.6 happy-dom
 npx tailwindcss init -p
 
 # Install Reka UI v2 (component library setup)
-npm install reka-ui
+npm install reka-ui@2.6.0
 ```
 
 **Vite + Vue 3 Development Server**:

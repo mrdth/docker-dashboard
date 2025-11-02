@@ -309,27 +309,29 @@
 ### Backend
 ```json
 {
-  "express": "^4.18.x",
-  "express-ws": "^5.x",
-  "dockerode": "^3.3.x",
-  "dotenv": "^16.x",
-  "winston": "^3.x",
-  "typescript": "^5.x",
-  "vitest": "^1.x",
-  "supertest": "^6.x"
+  "express": "^5.1.0",
+  "express-ws": "^5.0.2",
+  "dockerode": "^4.0.9",
+  "dotenv": "^17.2.3",
+  "winston": "^3.18.3",
+  "typescript": "^5.9.3",
+  "vitest": "^4.0.6",
+  "supertest": "^7.1.4"
 }
 ```
 
 ### Frontend
 ```json
 {
-  "vue": "^3.4.x",
-  "vite": "^5.x",
-  "typescript": "^5.x",
-  "tailwindcss": "^3.x",
-  "reka-ui": "^2.x",
-  "vitest": "^1.x",
-  "@vue/test-utils": "^2.x"
+  "vue": "^3.5.13",
+  "vite": "^7.1.12",
+  "typescript": "^5.9.3",
+  "tailwindcss": "^4.1.4",
+  "postcss": "^8.5.3",
+  "autoprefixer": "^10.4.21",
+  "reka-ui": "^2.6.0",
+  "vitest": "^4.0.6",
+  "@vue/test-utils": "^2.4.6"
 }
 ```
 

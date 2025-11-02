@@ -11,12 +11,12 @@
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.x (Node.js 20+ backend, Vue 3 frontend)  
+**Language/Version**: TypeScript 5.9.3 (Node.js 20+ backend, Vue 3 frontend)  
 **Primary Dependencies**: 
-- Backend: Express.js 4.18.x, express-ws 5.x, dockerode 3.3.x
-- Frontend: Vue 3 3.4.x, Vite 5.x, Reka UI v2.x, Tailwind CSS 3.x
+- Backend: Express.js 5.1.0, express-ws 5.0.2, dockerode 4.0.9
+- Frontend: Vue 3 3.5.13, Vite 7.1.12, Reka UI 2.6.0, Tailwind CSS 4.1.4
 **Storage**: N/A (real-time metrics only, no persistence)  
-**Testing**: Vitest 1.x + Vue Test Utils 2.x (frontend), Supertest 6.x (backend)  
+**Testing**: Vitest 4.0.6 + Vue Test Utils 2.4.6 (frontend), Supertest 7.1.4 (backend)  
 **Target Platform**: Web browser (Chrome, Firefox, Safari, Edge - last 2 versions), Linux/Docker
 **Project Type**: Web application (separate backend/frontend)  
 **Performance Goals**: Dashboard load <3s (50+ containers), metrics update <100ms latency, search <1s  
