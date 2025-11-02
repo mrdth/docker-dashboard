@@ -18,6 +18,13 @@
                     <th class="px-6 py-3 text-left font-semibold text-gray-900">
                         Image
                     </th>
+                    <!-- T089: Add metrics columns -->
+                    <th class="px-6 py-3 text-left font-semibold text-gray-900">
+                        CPU %
+                    </th>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-900">
+                        Memory %
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -54,6 +61,23 @@
                             {{ container.image }}
                         </div>
                     </td>
+                    <!-- T089: Display metrics with MetricsCell component -->
+                    <td class="px-6 py-4">
+                        <MetricsCell
+                            v-if="container.metrics"
+                            :value="container.metrics.cpu.percentage"
+                            type="cpu"
+                        />
+                        <div v-else class="text-gray-400 text-sm">N/A</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <MetricsCell
+                            v-if="container.metrics"
+                            :value="container.metrics.memory.percentage"
+                            type="memory"
+                        />
+                        <div v-else class="text-gray-400 text-sm">N/A</div>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -62,6 +86,7 @@
 
 <script setup lang="ts">
 import ContainerStatusBadge from "./ContainerStatusBadge.vue";
+import MetricsCell from "./MetricsCell.vue";
 import type { Container } from "../types/index";
 
 interface Props {

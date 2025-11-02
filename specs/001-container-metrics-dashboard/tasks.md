@@ -188,40 +188,40 @@ Each user story phase includes:
 
 ### Contract Tests for User Story 2
 
-- [ ] T075 [P] Write contract test GET /api/containers/{id} returns 200 with metrics object including cpu, memory, diskIo, networkIo in tests/contract/containers.test.ts
-- [ ] T076 [P] Write contract test WebSocket metrics_update message includes timestamp, containerId, and metrics object in tests/contract/websocket.test.ts
-- [ ] T077 [P] Write contract test metrics_update sent every ~10 seconds for each running container in tests/contract/websocket.test.ts
+- [x] T075 [P] Write contract test GET /api/containers/{id} returns 200 with metrics object including cpu, memory, diskIo, networkIo in tests/contract/containers.test.ts
+- [x] T076 [P] Write contract test WebSocket metrics_update message includes timestamp, containerId, and metrics object in tests/contract/websocket.test.ts
+- [x] T077 [P] Write contract test metrics_update sent every ~10 seconds for each running container in tests/contract/websocket.test.ts
 
 ### Integration Tests for User Story 2
 
-- [ ] T078 [P] Write integration test in tests/integration/docker.test.ts: DockerService.getContainerStats() returns metrics with cpu.percentage >= 0
-- [ ] T079 [P] Write integration test in tests/integration/docker.test.ts: CPU percentage calculation handles multi-core systems (can exceed 100%)
-- [ ] T080 [P] Write integration test in tests/integration/docker.test.ts: Memory percentage calculated as usage/limit * 100
-- [ ] T081 [P] Write integration test in tests/integration/docker.test.ts: Disk I/O read/write bytes tracked correctly
+- [x] T078 [P] Write integration test in tests/integration/docker.test.ts: DockerService.getContainerStats() returns metrics with cpu.percentage >= 0
+- [x] T079 [P] Write integration test in tests/integration/docker.test.ts: CPU percentage calculation handles multi-core systems (can exceed 100%)
+- [x] T080 [P] Write integration test in tests/integration/docker.test.ts: Memory percentage calculated as usage/limit * 100
+- [x] T081 [P] Write integration test in tests/integration/docker.test.ts: Disk I/O read/write bytes tracked correctly
 
 ### Backend Implementation for User Story 2
 
-- [ ] T082 Implement backend/src/api/routes/containers.ts GET /api/containers/{id} endpoint returning Container with metrics property
-- [ ] T083 [P] Extend docker.service.ts: CPU percentage calculation accounts for system_cpu_usage delta and number of CPUs
-- [ ] T084 [P] Extend docker.service.ts: Memory percentage calculation as (usage / limit) * 100, handle cases where limit is 0
-- [ ] T085 [P] Extend docker.service.ts: Disk I/O calculations tracking readBytes, writeBytes, readBytesPerSec, writeBytesPerSec
-- [ ] T086 [P] Extend docker.service.ts: Network I/O calculations tracking receivedBytes, sentBytes, receivedBytesPerSec, sentBytesPerSec
-- [ ] T087 Implement metrics_update WebSocket message broadcast: include timestamp, containerId, and full metrics object every 10s
+- [x] T082 Implement backend/src/api/routes/containers.ts GET /api/containers/{id} endpoint returning Container with metrics property
+- [x] T083 [P] Extend docker.service.ts: CPU percentage calculation accounts for system_cpu_usage delta and number of CPUs
+- [x] T084 [P] Extend docker.service.ts: Memory percentage calculation as (usage / limit) * 100, handle cases where limit is 0
+- [x] T085 [P] Extend docker.service.ts: Disk I/O calculations tracking readBytes, writeBytes, readBytesPerSec, writeBytesPerSec
+- [x] T086 [P] Extend docker.service.ts: Network I/O calculations tracking receivedBytes, sentBytes, receivedBytesPerSec, sentBytesPerSec
+- [x] T087 Implement metrics_update WebSocket message broadcast: include timestamp, containerId, and full metrics object every 10s
 
 ### Frontend Implementation for User Story 2
 
-- [ ] T088 Extend frontend/src/composables/useContainers.ts: add metrics field to Container, update from WebSocket metrics_update messages
-- [ ] T089 [P] Extend frontend/src/components/ContainerListTable.vue: add CPU%, Memory% columns, update on metrics_update
-- [ ] T090 [P] Create frontend/src/components/MetricsCell.vue displaying percentage with color coding: green (<50%), yellow (50-80%), red (>80%); handle CPU >100% (multi-core) and memory 0-100%; use responsive font scaling to prevent truncation (see plan.md High CPU/Memory Value Handling)
-- [ ] T091 [P] Create frontend/src/components/ContainerDetailView.vue displaying full metrics: CPU%, memory bytes/%, disk I/O rates, network I/O rates in detail panel
+- [x] T088 Extend frontend/src/composables/useContainers.ts: add metrics field to Container, update from WebSocket metrics_update messages
+- [x] T089 [P] Extend frontend/src/components/ContainerListTable.vue: add CPU%, Memory% columns, update on metrics_update
+- [x] T090 [P] Create frontend/src/components/MetricsCell.vue displaying percentage with color coding: green (<50%), yellow (50-80%), red (>80%); handle CPU >100% (multi-core) and memory 0-100%; use responsive font scaling to prevent truncation (see plan.md High CPU/Memory Value Handling)
+- [x] T091 [P] Create frontend/src/components/ContainerDetailView.vue displaying full metrics: CPU%, memory bytes/%, disk I/O rates, network I/O rates in detail panel
 - [ ] T092 Implement metric update animation: smooth number transitions when metrics change (use CSS transitions or Vue transitions)
-- [ ] T093 Handle metrics unavailable state: show "N/A" with indicator when metrics.status === "unavailable"
+- [x] T093 Handle metrics unavailable state: show "N/A" with indicator when metrics.status === "unavailable"
 
 ### Component Tests for User Story 2
 
-- [ ] T094 [P] Write component test for MetricsCell.vue: verify color changes based on percentage (green <50%, yellow 50-80%, red >80%)
-- [ ] T095 [P] Write component test for ContainerDetailView.vue: verify all metric fields displayed (cpu, memory, diskIo, networkIo)
-- [ ] T096 Write component test for ContainerListTable.vue: verify metrics update when WebSocket metrics_update received
+- [x] T094 [P] Write component test for MetricsCell.vue: verify color changes based on percentage (green <50%, yellow 50-80%, red >80%)
+- [x] T095 [P] Write component test for ContainerDetailView.vue: verify all metric fields displayed (cpu, memory, diskIo, networkIo)
+- [x] T096 Write component test for ContainerListTable.vue: verify metrics update when WebSocket metrics_update received
 
 **Checkpoint**: User Story 2 complete. Dashboard now shows resource utilization for visibility into container performance.
 

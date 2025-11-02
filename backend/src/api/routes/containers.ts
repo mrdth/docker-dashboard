@@ -111,8 +111,8 @@ router.get(
 );
 
 /**
- * GET /api/containers/:id
- * Returns single container with full details
+ * T082: GET /api/containers/:id
+ * Returns single container with full details including metrics
  */
 router.get(
     "/:id",
@@ -121,6 +121,46 @@ router.get(
             const { id } = req.params;
 
             const container = await dockerService.getContainer(id);
+
+            // T082: Fetch metrics for the container
+            try {
+                container.metrics = await dockerService.getContainerStats(id);
+            } catch (error) {
+                // T093: Handle metrics unavailable state gracefully
+                container.metrics = {
+                    cpu: {
+                        percentage: 0,
+                        cores: 0,
+                        systemUsage: 0,
+                        containerUsage: 0,
+                    },
+                    memory: { usage: 0, limit: 0, percentage: 0 },
+                    diskIo: {
+                        readBytes: 0,
+                        writeBytes: 0,
+                        readBytesPerSec: 0,
+                        writeBytesPerSec: 0,
+                    },
+                    networkIo: {
+                        receivedBytes: 0,
+                        sentBytes: 0,
+                        receivedBytesPerSec: 0,
+                        sentBytesPerSec: 0,
+                    },
+                    timestamp: new Date().toISOString(),
+                    status: "unavailable",
+                };
+
+                log(
+                    "warn",
+                    "Failed to fetch container metrics, using unavailable status",
+                    {
+                        service: "api",
+                        operation: "getContainerDetail",
+                        containerId: id,
+                    },
+                );
+            }
 
             res.json({
                 container,
