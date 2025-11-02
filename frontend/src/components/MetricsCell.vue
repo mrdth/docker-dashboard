@@ -1,5 +1,5 @@
 <template>
-    <div class="flex items-center gap-2">
+    <div class="flex flex-col items-center gap-2">
         <!-- T090: Display percentage with color coding and responsive font scaling -->
         <div
             class="px-2 py-1 rounded font-mono text-sm"

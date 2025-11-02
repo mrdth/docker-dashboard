@@ -6,10 +6,14 @@
                     <th class="px-6 py-3 text-left font-semibold text-gray-900">
                         Name
                     </th>
-                    <th class="px-6 py-3 text-left font-semibold text-gray-900">
+                    <th
+                        class="px-6 py-3 text-center font-semibold text-gray-900"
+                    >
                         Container ID
                     </th>
-                    <th class="px-6 py-3 text-left font-semibold text-gray-900">
+                    <th
+                        class="px-6 py-3 text-center font-semibold text-gray-900"
+                    >
                         Status
                     </th>
                     <th class="px-6 py-3 text-left font-semibold text-gray-900">
@@ -19,10 +23,14 @@
                         Image
                     </th>
                     <!-- T089: Add metrics columns -->
-                    <th class="px-6 py-3 text-left font-semibold text-gray-900">
+                    <th
+                        class="px-6 py-3 text-center font-semibold text-gray-900"
+                    >
                         CPU %
                     </th>
-                    <th class="px-6 py-3 text-left font-semibold text-gray-900">
+                    <th
+                        class="px-6 py-3 text-center font-semibold text-gray-900"
+                    >
                         Memory %
                     </th>
                 </tr>
@@ -38,14 +46,14 @@
                             {{ container.name }}
                         </div>
                     </td>
-                    <td class="px-6 py-4">
+                    <td class="px-6 py-4 text-center">
                         <code
                             class="text-xs bg-gray-100 px-2 py-1 rounded text-gray-700"
                         >
                             {{ container.id.substring(0, 12) }}
                         </code>
                     </td>
-                    <td class="px-6 py-4">
+                    <td class="px-6 py-4 text-center">
                         <ContainerStatusBadge :status="container.status" />
                     </td>
                     <td class="px-6 py-4">
@@ -93,7 +101,7 @@ interface Props {
     containers: Container[];
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 /**
  * Format timestamp to readable date
