@@ -372,15 +372,15 @@ describe("Container API Contracts", () => {
                 const imageInfo = container.imageInfo;
 
                 expect(imageInfo).toHaveProperty("updateAvailable");
-                expect(imageInfo).toHaveProperty("latestVersion");
                 expect(imageInfo).toHaveProperty("registryStatus");
+
+                // latestVersion is optional - present when checked and available, absent for unable_to_check/checking
+                if (imageInfo.latestVersion !== undefined) {
+                    expect(typeof imageInfo.latestVersion).toBe("string");
+                }
 
                 // Verify types
                 expect(typeof imageInfo.updateAvailable).toBe("boolean");
-                expect(
-                    typeof imageInfo.latestVersion === "string" ||
-                        imageInfo.latestVersion === undefined,
-                ).toBe(true);
                 expect(["checked", "unable_to_check", "checking"]).toContain(
                     imageInfo.registryStatus,
                 );
