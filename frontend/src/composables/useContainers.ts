@@ -92,13 +92,50 @@ export function useContainers(): UseContainersState & {
 
     /**
      * Handle WebSocket container_list message
+     * Merge new container data without overwriting existing metrics
      */
     function handleContainerListUpdate(message: any): void {
         const { containers: updatedContainers } = message.data;
-        if (Array.isArray(updatedContainers)) {
-            containers.value = updatedContainers;
-            lastUpdated.value = new Date();
+        if (!Array.isArray(updatedContainers)) {
+            return;
         }
+
+        // Create a map of updated containers by ID for quick lookup
+        const updatedMap = new Map(
+            updatedContainers.map((c: Container) => [c.id, c]),
+        );
+
+        // Merge updated container data while preserving metrics
+        const mergedContainers = containers.value.map((existing) => {
+            const updated = updatedMap.get(existing.id);
+            if (updated) {
+                // Merge: keep existing metrics, update other fields
+                return {
+                    ...updated,
+                    metrics: existing.metrics, // Preserve existing metrics
+                };
+            }
+            return existing;
+        });
+
+        // Add any new containers that weren't in the previous list
+        const existingIds = new Set(containers.value.map((c) => c.id));
+        updatedContainers.forEach((updated: Container) => {
+            if (!existingIds.has(updated.id)) {
+                mergedContainers.push(updated);
+            }
+        });
+
+        // Remove containers that are no longer in the list
+        const updatedIds = new Set(
+            updatedContainers.map((c: Container) => c.id),
+        );
+        const finalContainers = mergedContainers.filter((c) =>
+            updatedIds.has(c.id),
+        );
+
+        containers.value = finalContainers;
+        lastUpdated.value = new Date();
     }
 
     /**
