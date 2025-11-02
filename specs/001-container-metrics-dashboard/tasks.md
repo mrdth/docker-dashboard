@@ -134,47 +134,47 @@ Each user story phase includes:
 
 ### Contract Tests for User Story 1
 
-- [ ] T049 [P] Write contract test GET /api/containers returns 200 with {containers: Container[], error: null} schema in tests/contract/containers.test.ts
-- [ ] T050 [P] Write contract test GET /api/containers returns 503 with DOCKER_DAEMON_UNAVAILABLE error when docker unavailable in tests/contract/containers.test.ts
-- [ ] T051 [P] Write contract test GET /api/containers filters by status query param (status=running) in tests/contract/containers.test.ts
-- [ ] T052 [P] Write contract test GET /api/containers filters by name query param (name=nginx) in tests/contract/containers.test.ts
+- [x] T049 [P] Write contract test GET /api/containers returns 200 with {containers: Container[], error: null} schema in tests/contract/containers.test.ts
+- [x] T050 [P] Write contract test GET /api/containers returns 503 with DOCKER_DAEMON_UNAVAILABLE error when docker unavailable in tests/contract/containers.test.ts
+- [x] T051 [P] Write contract test GET /api/containers filters by status query param (status=running) in tests/contract/containers.test.ts
+- [x] T052 [P] Write contract test GET /api/containers filters by name query param (name=nginx) in tests/contract/containers.test.ts
 
 ### Integration Tests for User Story 1
 
-- [ ] T053 [P] Write integration test in tests/integration/docker.test.ts: DockerService.listContainers() returns array of containers with id, name, status, created, image fields
-- [ ] T054 [P] Write integration test in tests/integration/docker.test.ts: DockerService.listContainers() handles no containers gracefully (returns empty array)
-- [ ] T055 [P] Write integration test in tests/integration/docker.test.ts: Container status mapping normalizes Docker status strings to running/stopped/paused/exited
+- [x] T053 [P] Write integration test in tests/integration/docker.test.ts: DockerService.listContainers() returns array of containers with id, name, status, created, image fields
+- [x] T054 [P] Write integration test in tests/integration/docker.test.ts: DockerService.listContainers() handles no containers gracefully (returns empty array)
+- [x] T055 [P] Write integration test in tests/integration/docker.test.ts: Container status mapping normalizes Docker status strings to running/stopped/paused/exited
 
 ### Backend Implementation for User Story 1
 
-- [ ] T056 Implement backend/src/api/routes/containers.ts GET /api/containers endpoint returning all containers with optional name and status filters
-- [ ] T057 [P] Implement backend/src/api/routes/containers.ts request validation: validate status is one of running/stopped/paused/exited, validate name is non-empty string
-- [ ] T058 [P] Implement backend/src/api/routes/containers.ts error handling: catch DockerDaemonError and return 503, log errors with context
-- [ ] T059 Extend backend/src/main.ts to register /api/containers route and apply cors/error-handler middleware
+- [x] T056 Implement backend/src/api/routes/containers.ts GET /api/containers endpoint returning all containers with optional name and status filters
+- [x] T057 [P] Implement backend/src/api/routes/containers.ts request validation: validate status is one of running/stopped/paused/exited, validate name is non-empty string
+- [x] T058 [P] Implement backend/src/api/routes/containers.ts error handling: catch DockerDaemonError and return 503, log errors with context
+- [x] T059 Extend backend/src/main.ts to register /api/containers route and apply cors/error-handler middleware
 
 ### WebSocket Real-Time Updates for User Story 1
 
-- [ ] T060 Implement backend/src/websocket/manager.ts metrics collection loop: poll containers every 10s, detect status changes, broadcast container_status_changed message only on actual changes
-- [ ] T061 [P] Implement backend/src/websocket/handlers.ts handler for 'get_containers' message: return container_list with current containers
-- [ ] T062 Implement backend/src/websocket/routes.ts GET /api/metrics/stream WebSocket endpoint with express-ws, register handlers, start metrics collection on first client connect
-- [ ] T063 Extend backend/src/main.ts to initialize WebSocket routes and express-ws middleware
-- [ ] T064 [P] Implement ping/pong keep-alive in websocket manager (server sends ping every 30s, closes connection if no pong within 10s)
+- [x] T060 Implement backend/src/websocket/manager.ts metrics collection loop: poll containers every 10s, detect status changes, broadcast container_status_changed message only on actual changes
+- [x] T061 [P] Implement backend/src/websocket/handlers.ts handler for 'get_containers' message: return container_list with current containers
+- [x] T062 Implement backend/src/websocket/routes.ts GET /api/metrics/stream WebSocket endpoint with express-ws, register handlers, start metrics collection on first client connect
+- [x] T063 Extend backend/src/main.ts to initialize WebSocket routes and express-ws middleware
+- [x] T064 [P] Implement ping/pong keep-alive in websocket manager (server sends ping every 30s, closes connection if no pong within 10s)
 
 ### Frontend Implementation for User Story 1
 
-- [ ] T065 Create frontend/src/pages/Dashboard.vue with container list display, integrate useContainers composable
-- [ ] T066 Create frontend/src/composables/useContainers.ts with reactive containers state, initial REST fetch, WebSocket container_status_changed listener for updates
-- [ ] T067 [P] Create frontend/src/components/ContainerListTable.vue displaying containers in HTML table: columns for name, ID, status, created time
-- [ ] T068 [P] Create frontend/src/components/ContainerStatusBadge.vue with status colors: green (running), gray (stopped), yellow (paused), red (exited)
-- [ ] T069 [P] Create frontend/src/components/ContainerEmptyState.vue showing "no containers" message with icon when list is empty
-- [ ] T070 Implement error handling in Dashboard.vue: display ErrorBanner when Docker daemon unavailable (docker_daemon_offline message), show retry button
+- [x] T065 Create frontend/src/pages/Dashboard.vue with container list display, integrate useContainers composable
+- [x] T066 Create frontend/src/composables/useContainers.ts with reactive containers state, initial REST fetch, WebSocket container_status_changed listener for updates
+- [x] T067 [P] Create frontend/src/components/ContainerListTable.vue displaying containers in HTML table: columns for name, ID, status, created time
+- [x] T068 [P] Create frontend/src/components/ContainerStatusBadge.vue with status colors: green (running), gray (stopped), yellow (paused), red (exited)
+- [x] T069 [P] Create frontend/src/components/ContainerEmptyState.vue showing "no containers" message with icon when list is empty
+- [x] T070 Implement error handling in Dashboard.vue: display ErrorBanner when Docker daemon unavailable (docker_daemon_offline message), show retry button
 
 ### Component Tests for User Story 1
 
-- [ ] T071 [P] Write component test for ContainerStatusBadge.vue: verify badge shows correct color for each status
-- [ ] T072 [P] Write component test for ContainerListTable.vue: verify table renders with container rows, name/ID/status columns visible
-- [ ] T073 [P] Write component test for ContainerEmptyState.vue: verify empty message shown when containers array is empty
-- [ ] T074 Write component test for Dashboard.vue: verify container list displayed on load, error banner shown when docker_daemon_offline message received
+- [x] T071 [P] Write component test for ContainerStatusBadge.vue: verify badge shows correct color for each status
+- [x] T072 [P] Write component test for ContainerListTable.vue: verify table renders with container rows, name/ID/status columns visible
+- [x] T073 [P] Write component test for ContainerEmptyState.vue: verify empty message shown when containers array is empty
+- [x] T074 Write component test for Dashboard.vue: verify container list displayed on load, error banner shown when docker_daemon_offline message received
 
 **Checkpoint**: User Story 1 complete and independently testable. MVP can be deployed with container list visibility.
 
