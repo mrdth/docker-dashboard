@@ -32,7 +32,7 @@
 
             <!-- Last Updated -->
             <div v-if="lastUpdated" class="mt-4 text-sm text-gray-600">
-                Last updated: {{ formatTime(lastUpdated) }}
+                Last updated: {{ formatTime(lastUpdated!) }}
             </div>
         </div>
     </div>
@@ -66,7 +66,9 @@ if (composableError) {
 /**
  * Format timestamp to readable time
  */
-function formatTime(date: Date): string {
+function formatTime(date: Date | null): string {
+    if (!date) return "";
+    if (!(date instanceof Date)) return "";
     return date.toLocaleTimeString();
 }
 
