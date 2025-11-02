@@ -162,6 +162,33 @@ router.get(
                 );
             }
 
+            // T104-T108: Fetch ports and logs for the container
+            try {
+                // T105: Fetch ports from docker service
+                container.ports = await dockerService.getPorts(id);
+            } catch (error) {
+                // T108: Handle edge case gracefully - no ports is valid
+                container.ports = [];
+                logError("Failed to fetch container ports", error as Error, {
+                    service: "api",
+                    operation: "getContainerDetail",
+                    containerId: id,
+                });
+            }
+
+            try {
+                // T106-T107: Fetch logs from docker service
+                container.logs = await dockerService.getLogs(id);
+            } catch (error) {
+                // Handle log fetch failure gracefully
+                container.logs = [];
+                logError("Failed to fetch container logs", error as Error, {
+                    service: "api",
+                    operation: "getContainerDetail",
+                    containerId: id,
+                });
+            }
+
             res.json({
                 container,
                 error: null,

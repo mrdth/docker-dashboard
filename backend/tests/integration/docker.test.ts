@@ -187,6 +187,79 @@ describe("DockerService Integration Tests", () => {
         });
     });
 
+    describe("getPorts - User Story 3 Ports", () => {
+        it("T100: returns array of Port with protocol, ports, IP", async () => {
+            const containers = await dockerService.listContainers();
+
+            if (containers.length > 0) {
+                const ports = await dockerService.getPorts(containers[0].id);
+
+                expect(Array.isArray(ports)).toBe(true);
+
+                // If container has ports, verify structure
+                if (ports.length > 0) {
+                    const port = ports[0];
+                    expect(port).toHaveProperty("protocol");
+                    expect(port).toHaveProperty("containerPort");
+                    expect(typeof port.protocol).toBe("string");
+                    expect(typeof port.containerPort).toBe("number");
+                }
+            }
+        });
+
+        it("T101: handles containers with no exposed ports (returns empty array)", async () => {
+            const containers = await dockerService.listContainers();
+
+            if (containers.length > 0) {
+                const ports = await dockerService.getPorts(containers[0].id);
+
+                // Should always return an array, even if empty
+                expect(Array.isArray(ports)).toBe(true);
+                expect(ports).toBeDefined();
+            }
+        });
+    });
+
+    describe("getLogs - User Story 3 Logs", () => {
+        it("T102: returns last 100 lines with timestamp, message, stream", async () => {
+            const containers = await dockerService.listContainers();
+
+            if (containers.length > 0) {
+                const logs = await dockerService.getLogs(containers[0].id);
+
+                expect(Array.isArray(logs)).toBe(true);
+
+                // If container has logs, verify structure
+                if (logs.length > 0) {
+                    const log = logs[0];
+                    expect(log).toHaveProperty("timestamp");
+                    expect(log).toHaveProperty("message");
+                    expect(log).toHaveProperty("stream");
+                    expect(typeof log.message).toBe("string");
+                    expect(typeof log.stream).toBe("string");
+                }
+            }
+        });
+
+        it("T103: filters logs to 1-hour window", async () => {
+            const containers = await dockerService.listContainers();
+
+            if (containers.length > 0) {
+                const logs = await dockerService.getLogs(containers[0].id);
+
+                expect(Array.isArray(logs)).toBe(true);
+
+                // Verify all logs are within 1 hour
+                const oneHourAgo = Date.now() - 60 * 60 * 1000;
+
+                logs.forEach((log) => {
+                    const logTime = new Date(log.timestamp).getTime();
+                    expect(logTime).toBeGreaterThanOrEqual(oneHourAgo);
+                });
+            }
+        });
+    });
+
     describe("Docker connection", () => {
         it("verifies Docker daemon is available", async () => {
             try {

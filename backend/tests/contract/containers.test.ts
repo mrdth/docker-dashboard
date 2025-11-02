@@ -220,4 +220,84 @@ describe("Container API Contracts", () => {
             expect(true).toBe(true);
         });
     });
+
+    describe("GET /api/containers/{id} - User Story 3 Ports and Logs", () => {
+        it("T097: includes ports array in response", async () => {
+            const response = await request(wsApp)
+                .get("/api/containers")
+                .expect(200);
+
+            if (
+                response.body.containers &&
+                response.body.containers.length > 0
+            ) {
+                const containerId = response.body.containers[0].id;
+
+                const detailResponse = await request(wsApp)
+                    .get(`/api/containers/${containerId}`)
+                    .expect(200);
+
+                expect(detailResponse.body).toHaveProperty("container");
+                const container = detailResponse.body.container;
+
+                expect(container).toHaveProperty("ports");
+                expect(Array.isArray(container.ports)).toBe(true);
+            }
+        });
+
+        it("T098: includes logs array (last 100 lines) in response", async () => {
+            const response = await request(wsApp)
+                .get("/api/containers")
+                .expect(200);
+
+            if (
+                response.body.containers &&
+                response.body.containers.length > 0
+            ) {
+                const containerId = response.body.containers[0].id;
+
+                const detailResponse = await request(wsApp)
+                    .get(`/api/containers/${containerId}`)
+                    .expect(200);
+
+                expect(detailResponse.body).toHaveProperty("container");
+                const container = detailResponse.body.container;
+
+                expect(container).toHaveProperty("logs");
+                expect(Array.isArray(container.logs)).toBe(true);
+                // Logs should be at most 100 lines
+                expect(container.logs.length).toBeLessThanOrEqual(100);
+            }
+        });
+
+        it("T099: ports include protocol, containerPort, hostPort, hostIp fields", async () => {
+            const response = await request(wsApp)
+                .get("/api/containers")
+                .expect(200);
+
+            if (
+                response.body.containers &&
+                response.body.containers.length > 0
+            ) {
+                const containerId = response.body.containers[0].id;
+
+                const detailResponse = await request(wsApp)
+                    .get(`/api/containers/${containerId}`)
+                    .expect(200);
+
+                const container = detailResponse.body.container;
+
+                // If container has ports, verify structure
+                if (container.ports && container.ports.length > 0) {
+                    const port = container.ports[0];
+
+                    expect(port).toHaveProperty("protocol");
+                    expect(port).toHaveProperty("containerPort");
+                    // hostPort and hostIp may be optional for exposed but unmapped ports
+                    expect(typeof port.protocol).toBe("string");
+                    expect(typeof port.containerPort).toBe("number");
+                }
+            }
+        });
+    });
 });

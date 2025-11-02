@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import Dashboard from "./pages/Dashboard.vue";
+// T113-T114: Use router-view for page routing
 </script>
 
 <template>
     <div id="app" class="min-h-screen bg-gray-50">
-        <Dashboard />
+        <router-view />
     </div>
 </template>
 

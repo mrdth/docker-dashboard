@@ -235,39 +235,39 @@ Each user story phase includes:
 
 ### Contract Tests for User Story 3
 
-- [ ] T097 [P] Write contract test GET /api/containers/{id} includes ports array in tests/contract/containers.test.ts
-- [ ] T098 [P] Write contract test GET /api/containers/{id} includes logs array (last 100 lines) in tests/contract/containers.test.ts
-- [ ] T099 [P] Write contract test ports include protocol, containerPort, hostPort, hostIp fields in tests/contract/containers.test.ts
+- [x] T097 [P] Write contract test GET /api/containers/{id} includes ports array in tests/contract/containers.test.ts
+- [x] T098 [P] Write contract test GET /api/containers/{id} includes logs array (last 100 lines) in tests/contract/containers.test.ts
+- [x] T099 [P] Write contract test ports include protocol, containerPort, hostPort, hostIp fields in tests/contract/containers.test.ts
 
 ### Integration Tests for User Story 3
 
-- [ ] T100 [P] Write integration test in tests/integration/docker.test.ts: DockerService.getPorts() returns array of Port with protocol, ports, IP
-- [ ] T101 [P] Write integration test in tests/integration/docker.test.ts: getPorts() handles containers with no exposed ports (returns empty array)
-- [ ] T102 [P] Write integration test in tests/integration/docker.test.ts: DockerService.getLogs() returns last 100 lines with timestamp, message, stream
-- [ ] T103 [P] Write integration test in tests/integration/docker.test.ts: getLogs() filters logs to 1-hour window
+- [x] T100 [P] Write integration test in tests/integration/docker.test.ts: DockerService.getPorts() returns array of Port with protocol, ports, IP
+- [x] T101 [P] Write integration test in tests/integration/docker.test.ts: getPorts() handles containers with no exposed ports (returns empty array)
+- [x] T102 [P] Write integration test in tests/integration/docker.test.ts: DockerService.getLogs() returns last 100 lines with timestamp, message, stream
+- [x] T103 [P] Write integration test in tests/integration/docker.test.ts: getLogs() filters logs to 1-hour window
 
 ### Backend Implementation for User Story 3
 
-- [ ] T104 Extend backend/src/api/routes/containers.ts GET /api/containers/{id} to include ports and logs in response
-- [ ] T105 [P] Implement docker.service.ts port retrieval: fetch from inspect() response, normalize protocol (lowercase), handle no ports case
-- [ ] T106 [P] Implement docker.service.ts log retrieval: call /containers/{id}/logs with tail=100, parse timestamps, filter to 1-hour window
-- [ ] T107 [P] Implement docker.service.ts log parsing: handle both stdout and stderr streams, track sequence numbers
-- [ ] T108 Handle edge case: container with no ports exposed shows empty array with clear handling in API response
+- [x] T104 Extend backend/src/api/routes/containers.ts GET /api/containers/{id} to include ports and logs in response
+- [x] T105 [P] Implement docker.service.ts port retrieval: fetch from inspect() response, normalize protocol (lowercase), handle no ports case
+- [x] T106 [P] Implement docker.service.ts log retrieval: call /containers/{id}/logs with tail=100, parse timestamps, filter to 1-hour window
+- [x] T107 [P] Implement docker.service.ts log parsing: handle both stdout and stderr streams, track sequence numbers
+- [x] T108 Handle edge case: container with no ports exposed shows empty array with clear handling in API response
 
 ### Frontend Implementation for User Story 3
 
-- [ ] T109 Create frontend/src/components/PortsList.vue displaying port mappings as: "8080:80/tcp" format, handle no ports case
-- [ ] T110 [P] Create frontend/src/components/LogsViewer.vue (implements "logs summary" feature) displaying last 10 log lines in scrollable panel, timestamps left-aligned, messages monospace
-- [ ] T111 [P] Extend frontend/src/components/ContainerDetailView.vue to include PortsList and LogsViewer components
-- [ ] T112 Create frontend/src/pages/ContainerDetail.vue route for /containers/{id} showing full container info: name, status, metrics, ports, logs
-- [ ] T113 [P] Add router.ts with Vue Router config: routes for Dashboard, ContainerDetail pages
-- [ ] T114 Implement container detail fetch: GET /api/containers/{id} on page load, display ports and logs
+- [x] T109 Create frontend/src/components/PortsList.vue displaying port mappings as: "8080:80/tcp" format, handle no ports case
+- [x] T110 [P] Create frontend/src/components/LogsViewer.vue (implements "logs summary" feature) displaying last 10 log lines in scrollable panel, timestamps left-aligned, messages monospace
+- [x] T111 [P] Extend frontend/src/components/ContainerDetailView.vue to include PortsList and LogsViewer components
+- [x] T112 Create frontend/src/pages/ContainerDetail.vue route for /containers/{id} showing full container info: name, status, metrics, ports, logs
+- [x] T113 [P] Add router.ts with Vue Router config: routes for Dashboard, ContainerDetail pages
+- [x] T114 Implement container detail fetch: GET /api/containers/{id} on page load, display ports and logs
 
 ### Component Tests for User Story 3
 
-- [ ] T115 [P] Write component test for PortsList.vue: verify port displayed in "8080:80/tcp" format
-- [ ] T116 [P] Write component test for PortsList.vue: verify "no ports exposed" message shown for empty ports array
-- [ ] T117 [P] Write component test for LogsViewer.vue: verify logs displayed with timestamps and monospace formatting
+- [x] T115 [P] Write component test for PortsList.vue: verify port displayed in "8080:80/tcp" format
+- [x] T116 [P] Write component test for PortsList.vue: verify "no ports exposed" message shown for empty ports array
+- [x] T117 [P] Write component test for LogsViewer.vue: verify logs displayed with timestamps and monospace formatting
 
 **Checkpoint**: User Story 3 complete. Operators can quickly access service ports and debug with log viewing.
 
