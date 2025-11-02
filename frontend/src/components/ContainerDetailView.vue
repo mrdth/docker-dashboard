@@ -15,17 +15,21 @@
             </div>
 
             <div class="grid grid-cols-2 gap-4 mt-6 text-sm">
-                <div>
+                <div class="col-span-full">
                     <p class="text-gray-500">Image</p>
                     <p class="font-mono text-gray-900">{{ container.image }}</p>
                 </div>
                 <div>
                     <p class="text-gray-500">Created</p>
-                    <p class="text-gray-900">{{ formatDate(container.created) }}</p>
+                    <p class="text-gray-900">
+                        {{ formatDate(container.created) }}
+                    </p>
                 </div>
                 <div v-if="container.started">
                     <p class="text-gray-500">Started</p>
-                    <p class="text-gray-900">{{ formatDate(container.started) }}</p>
+                    <p class="text-gray-900">
+                        {{ formatDate(container.started) }}
+                    </p>
                 </div>
             </div>
         </div>
@@ -70,7 +74,9 @@
                             {{ container.metrics.memory.percentage }}%
                         </span>
                         <span class="text-sm text-gray-500">
-                            ({{ formatBytes(container.metrics.memory.usage) }}/{{
+                            ({{
+                                formatBytes(container.metrics.memory.usage)
+                            }}/{{
                                 formatBytes(container.metrics.memory.limit)
                             }})
                         </span>
@@ -94,7 +100,9 @@
                     <div class="space-y-1 text-sm">
                         <p class="text-gray-900">
                             <span class="font-medium">Read:</span>
-                            {{ formatBytes(container.metrics.diskIo.readBytes) }}
+                            {{
+                                formatBytes(container.metrics.diskIo.readBytes)
+                            }}
                             ({{
                                 formatBytes(
                                     container.metrics.diskIo.readBytesPerSec,
@@ -135,7 +143,11 @@
                         </p>
                         <p class="text-gray-900">
                             <span class="font-medium">Sent:</span>
-                            {{ formatBytes(container.metrics.networkIo.sentBytes) }}
+                            {{
+                                formatBytes(
+                                    container.metrics.networkIo.sentBytes,
+                                )
+                            }}
                             ({{
                                 formatBytes(
                                     container.metrics.networkIo.sentBytesPerSec,
@@ -158,15 +170,20 @@
         <!-- T091: Ports Section -->
         <div
             v-if="container.ports && container.ports.length > 0"
+            a7737d7d69d7
             class="bg-white rounded-lg shadow p-6"
         >
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Port Mappings</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                Port Mappings
+            </h3>
             <PortsList :ports="container.ports" />
         </div>
 
         <!-- T091: Logs Section -->
         <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Logs</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                Recent Logs
+            </h3>
             <LogsViewer :logs="container.logs || []" />
         </div>
     </div>
@@ -187,11 +204,8 @@ defineProps<Props>();
 /**
  * Format timestamp to readable date
  */
-function formatDate(timestamp: number | string): string {
-    const ts =
-        typeof timestamp === "string" ? parseInt(timestamp, 10) : timestamp;
-    const date = new Date(ts * 1000);
-    return date.toLocaleString();
+function formatDate(dateString: string): string {
+    return new Date(dateString).toLocaleString();
 }
 
 /**

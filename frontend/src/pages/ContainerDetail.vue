@@ -3,16 +3,16 @@
         <!-- Header with back button -->
         <div class="bg-white border-b border-gray-200 sticky top-0 z-10">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <div class="flex items-center gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 pb-4">
+                        {{ containerName }}
+                    </h1>
                     <button
                         @click="goBack"
-                        class="text-gray-600 hover:text-gray-900 transition-colors"
+                        class="text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
                     >
                         ← Back to Containers
                     </button>
-                    <h1 class="text-3xl font-bold text-gray-900">
-                        {{ containerName }}
-                    </h1>
                 </div>
             </div>
         </div>
@@ -35,13 +35,8 @@
             </div>
 
             <!-- Not Found State -->
-            <div
-                v-else
-                class="bg-white rounded-lg shadow p-8 text-center"
-            >
-                <p class="text-gray-600 mb-4">
-                    Container not found
-                </p>
+            <div v-else class="bg-white rounded-lg shadow p-8 text-center">
+                <p class="text-gray-600 mb-4">Container not found</p>
                 <button
                     @click="goBack"
                     class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
