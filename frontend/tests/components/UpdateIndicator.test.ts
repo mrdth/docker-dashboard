@@ -123,8 +123,8 @@ describe("T144-T146: UpdateIndicator.vue", () => {
             props: { imageInfo: undefined },
         });
 
-        // Should render empty
-        expect(wrapper.html()).toBe("");
+        // Vue renders a comment for v-if="false", so check that no content is visible
+        expect(wrapper.text()).toBe("");
     });
 
     it("displays correct styling for each registry status", () => {
