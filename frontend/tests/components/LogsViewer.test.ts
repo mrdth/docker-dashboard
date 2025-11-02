@@ -69,7 +69,7 @@ describe("T117: LogsViewer.vue", () => {
         expect(wrapper.text()).toContain("No logs available");
     });
 
-    it("displays only the last N log lines by default (10)", () => {
+    it("displays all log lines", () => {
         const manyLogs = Array.from({ length: 20 }, (_, i) => ({
             timestamp: new Date(Date.now() - (20 - i) * 1000).toISOString(),
             message: `Log message ${i + 1}`,
@@ -81,30 +81,13 @@ describe("T117: LogsViewer.vue", () => {
             props: { logs: manyLogs },
         });
 
-        // Should display at most 10 lines by default
+        // Should display all 20 lines
         const logLines = wrapper.findAll(".py-1");
-        expect(logLines.length).toBeLessThanOrEqual(10);
+        expect(logLines.length).toBe(20);
 
-        // Should show last messages (highest numbers)
+        // Should show all messages
+        expect(wrapper.text()).toContain("Log message 1");
         expect(wrapper.text()).toContain("Log message 20");
-        expect(wrapper.text()).toContain("Log message 19");
-    });
-
-    it("respects maxLines prop", () => {
-        const manyLogs = Array.from({ length: 20 }, (_, i) => ({
-            timestamp: new Date(Date.now() - (20 - i) * 1000).toISOString(),
-            message: `Log message ${i + 1}`,
-            stream: "stdout" as const,
-            sequence: i + 1,
-        }));
-
-        const wrapper = mount(LogsViewer, {
-            props: { logs: manyLogs, maxLines: 5 },
-        });
-
-        // Should display at most 5 lines
-        const logLines = wrapper.findAll(".py-1");
-        expect(logLines.length).toBeLessThanOrEqual(5);
     });
 
     it("displays stream indicator for logs", () => {
@@ -136,7 +119,7 @@ describe("T117: LogsViewer.vue", () => {
 
     it("displays messages in order with proper formatting", () => {
         const wrapper = mount(LogsViewer, {
-            props: { logs: mockLogs, maxLines: 20 },
+            props: { logs: mockLogs },
         });
 
         const text = wrapper.text();
@@ -175,7 +158,7 @@ describe("T117: LogsViewer.vue", () => {
         }));
 
         const wrapper = mount(LogsViewer, {
-            props: { logs: longLogs, maxLines: 20 },
+            props: { logs: longLogs },
         });
 
         const html = wrapper.html();

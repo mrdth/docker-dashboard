@@ -90,7 +90,7 @@ Each user story phase includes:
 - [x] T027 [P] Implement docker.service.ts method: `async getContainer(id: string)` returning single Container with full details
 - [x] T028 [P] Implement docker.service.ts method: `async getContainerStats(id: string)` returning ContainerMetrics with CPU%, memory, disk I/O, network I/O calculations
 - [x] T029 [P] Implement docker.service.ts method: `async getPorts(id: string)` returning Port[] with protocol, containerPort, hostPort
-- [x] T030 [P] Implement docker.service.ts method: `async getLogs(id: string)` returning LogEntry[] (last 100 lines, 1-hour window)
+- [x] T030 [P] Implement docker.service.ts method: `async getLogs(id: string)` returning LogEntry[] (last 100 lines)
 - [x] T031 [P] Implement docker.service.ts method: `async getImageInfo(imageName: string)` returning Image with update availability info
 - [x] T032 Implement docker.service.ts health check: `async verifyVersion()` ensuring Docker API v1.40+, throw DockerDaemonError if unavailable
 - [x] T033 [P] Implement docker.service.ts error handling: wrap Docker API errors in custom error classes with clear messages
@@ -231,7 +231,7 @@ Each user story phase includes:
 
 **Goal**: Operators can see which ports containers expose and view recent log activity for troubleshooting.
 
-**Independent Test**: Open container detail → see port mappings (80:8080/tcp), see last 5-10 log lines with timestamps, verify "no ports" message when container has no exposed ports
+**Independent Test**: Open container detail → see port mappings (80:8080/tcp), see log lines with timestamps, verify "no ports" message when container has no exposed ports
 
 ### Contract Tests for User Story 3
 
@@ -244,7 +244,7 @@ Each user story phase includes:
 - [x] T100 [P] Write integration test in tests/integration/docker.test.ts: DockerService.getPorts() returns array of Port with protocol, ports, IP
 - [x] T101 [P] Write integration test in tests/integration/docker.test.ts: getPorts() handles containers with no exposed ports (returns empty array)
 - [x] T102 [P] Write integration test in tests/integration/docker.test.ts: DockerService.getLogs() returns last 100 lines with timestamp, message, stream
-- [x] T103 [P] Write integration test in tests/integration/docker.test.ts: getLogs() filters logs to 1-hour window
+- [x] T103 [P] Write integration test in tests/integration/docker.test.ts: getLogs() returns all available logs (up to 100 lines)
 
 ### Backend Implementation for User Story 3
 
@@ -257,7 +257,7 @@ Each user story phase includes:
 ### Frontend Implementation for User Story 3
 
 - [x] T109 Create frontend/src/components/PortsList.vue displaying port mappings as: "8080:80/tcp" format, handle no ports case
-- [x] T110 [P] Create frontend/src/components/LogsViewer.vue (implements "logs summary" feature) displaying last 10 log lines in scrollable panel, timestamps left-aligned, messages monospace
+- [x] T110 [P] Create frontend/src/components/LogsViewer.vue (implements "logs summary" feature) displaying all log lines in scrollable panel, timestamps left-aligned, messages monospace
 - [x] T111 [P] Extend frontend/src/components/ContainerDetailView.vue to include PortsList and LogsViewer components
 - [x] T112 Create frontend/src/pages/ContainerDetail.vue route for /containers/{id} showing full container info: name, status, metrics, ports, logs
 - [x] T113 [P] Add router.ts with Vue Router config: routes for Dashboard, ContainerDetail pages

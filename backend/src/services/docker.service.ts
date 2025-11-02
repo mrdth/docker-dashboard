@@ -186,7 +186,7 @@ export class DockerService {
     }
 
     /**
-     * Get container logs (last 100 lines, 1-hour window)
+     * Get container logs (last 100 lines)
      */
     async getLogs(id: string): Promise<LogEntry[]> {
         try {
@@ -199,38 +199,51 @@ export class DockerService {
             });
 
             const logs: LogEntry[] = [];
-            const oneHourAgo = Date.now() - 60 * 60 * 1000;
+            const buffer = logStream as Buffer;
 
-            // Parse Docker log format
-            const lines = logStream
-                .toString()
-                .split("\n")
-                .filter((line: string) => line);
+            // Parse Docker's multiplexed log format
+            // Each log entry has: 1 byte stream type + 3 bytes padding + 4 bytes size + message
+            let offset = 0;
+            while (offset < buffer.length) {
+                // Need at least 8 bytes for header
+                if (offset + 8 > buffer.length) {
+                    break;
+                }
 
-            lines.forEach((line: string) => {
-                try {
-                    // Docker log format: timestamp message
-                    const match = line.match(
+                // Read header: stream type (1 byte) + 3 padding bytes + size (4 bytes big-endian)
+                const streamType = buffer[offset];
+                const size =
+                    (buffer[offset + 4] << 24) |
+                    (buffer[offset + 5] << 16) |
+                    (buffer[offset + 6] << 8) |
+                    buffer[offset + 7];
+
+                // Extract message
+                if (offset + 8 + size <= buffer.length) {
+                    const message = buffer
+                        .toString("utf-8", offset + 8, offset + 8 + size)
+                        .trim();
+
+                    // Parse timestamp and message from the log line
+                    // Format: timestamp message (e.g., "2025-11-02T18:15:39.777372702Z [Info] ...")
+                    const match = message.match(
                         /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z)\s(.*)$/,
                     );
 
                     if (match) {
-                        const [, timestamp, message] = match;
-                        const time = new Date(timestamp).getTime();
-
-                        // Only include logs from last hour
-                        if (time >= oneHourAgo) {
-                            logs.push({
-                                timestamp,
-                                message,
-                                stream: "stdout",
-                            });
-                        }
+                        const [, timestamp, logMessage] = match;
+                        logs.unshift({
+                            timestamp,
+                            message: logMessage,
+                            stream: streamType === 1 ? "stdout" : "stderr",
+                        });
                     }
-                } catch (e) {
-                    // Ignore parse errors
+
+                    offset += 8 + size;
+                } else {
+                    break;
                 }
-            });
+            }
 
             return logs;
         } catch (error) {

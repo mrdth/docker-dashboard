@@ -240,24 +240,6 @@ describe("DockerService Integration Tests", () => {
                 }
             }
         });
-
-        it("T103: filters logs to 1-hour window", async () => {
-            const containers = await dockerService.listContainers();
-
-            if (containers.length > 0) {
-                const logs = await dockerService.getLogs(containers[0].id);
-
-                expect(Array.isArray(logs)).toBe(true);
-
-                // Verify all logs are within 1 hour
-                const oneHourAgo = Date.now() - 60 * 60 * 1000;
-
-                logs.forEach((log) => {
-                    const logTime = new Date(log.timestamp).getTime();
-                    expect(logTime).toBeGreaterThanOrEqual(oneHourAgo);
-                });
-            }
-        });
     });
 
     describe("Docker connection", () => {

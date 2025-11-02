@@ -31,18 +31,15 @@ import type { LogEntry } from "../types/index";
 
 interface Props {
     logs: LogEntry[];
-    maxLines?: number;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-    maxLines: 10,
-});
+const props = defineProps<Props>();
 
 /**
- * Display only the last N log lines
+ * Display all log lines
  */
 const displayLogs = computed(() => {
-    return props.logs.slice(-props.maxLines);
+    return props.logs;
 });
 </script>
 

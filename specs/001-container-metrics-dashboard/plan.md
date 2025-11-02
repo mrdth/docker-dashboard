@@ -57,10 +57,10 @@
 
 The "logs summary" feature (User Story 3) is implemented as the **LogsViewer** component:
 - **Location**: frontend/src/components/LogsViewer.vue
-- **Functionality**: Displays last 100 log lines fetched from Docker API (shows 10 most recent in scrollable panel)
+- **Functionality**: Displays all log lines fetched from Docker API (up to 100 lines)
 - **Display format**: Timestamps (left-aligned), messages (monospace), optional stdout/stderr indicator
 - **Data source**: Fresh fetch from Docker API on container detail page open
-- **Retention**: 1-hour rolling window in backend memory
+- **Display behavior**: Scrollable panel showing all retrieved logs with full history visible
 
 ## References & Documentation
 
