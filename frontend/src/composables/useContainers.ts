@@ -26,7 +26,7 @@ export function useContainers(): UseContainersState & {
     const ws = getWebSocketConnection();
 
     /**
-     * T066: Fetch containers from REST API
+     * T066: Fetch containers from REST API with metrics
      */
     async function fetchContainers(): Promise<void> {
         loading.value = true;
@@ -39,7 +39,30 @@ export function useContainers(): UseContainersState & {
             }>("/api/containers");
 
             if (response && response.containers) {
-                containers.value = response.containers;
+                // For each container, fetch its detail to get metrics
+                const containersWithMetrics = await Promise.all(
+                    response.containers.map(async (container) => {
+                        try {
+                            const detailResponse = await get<{
+                                container: Container;
+                            }>(`/api/containers/${container.id}`);
+
+                            if (detailResponse?.container) {
+                                return detailResponse.container;
+                            }
+                            return container;
+                        } catch (err) {
+                            // If detail fetch fails, return container without metrics
+                            console.warn(
+                                `Failed to fetch metrics for container ${container.id}`,
+                                err,
+                            );
+                            return container;
+                        }
+                    }),
+                );
+
+                containers.value = containersWithMetrics;
                 lastUpdated.value = new Date();
             }
         } catch (err) {
@@ -122,8 +145,26 @@ export function useContainers(): UseContainersState & {
         // Subscribe to WebSocket messages
         ws.onMessage(handleWebSocketMessage);
 
-        // Request container updates
-        ws.send({ type: "ready" });
+        // Handle WebSocket connection errors
+        ws.onError((err) => {
+            console.error("WebSocket error:", err);
+            error.value =
+                "Real-time updates unavailable. Metrics will update on refresh.";
+        });
+
+        // Connect to WebSocket for real-time updates
+        try {
+            await ws.connect();
+            console.log("WebSocket connected successfully");
+
+            // Request container updates after connection
+            ws.send({ type: "ready" });
+        } catch (err) {
+            console.error("Failed to connect WebSocket:", err);
+            // Continue with REST API polling, WebSocket is optional
+            error.value =
+                "Real-time updates unavailable. Metrics will update on refresh.";
+        }
     });
 
     return {
