@@ -288,11 +288,25 @@ export class DockerService {
 
     /**
      * Normalize Docker container to our Container interface
+     * Handles both formats: listContainers() response and inspect() response
      */
     private normalizeContainer(dockerContainer: any): Container {
-        const status = this.normalizeStatus(
-            dockerContainer.State?.Status || "unknown",
-        );
+        // Handle different Docker API response formats
+        // listContainers() returns State as a string directly
+        // inspect() returns State as an object with Status property
+        let statusStr: string;
+
+        if (typeof dockerContainer.State === "string") {
+            // listContainers() format: State is a string like "running", "exited"
+            statusStr = dockerContainer.State;
+        } else if (dockerContainer.State?.Status) {
+            // inspect() format: State is an object with Status property
+            statusStr = dockerContainer.State.Status;
+        } else {
+            statusStr = "unknown";
+        }
+
+        const status = this.normalizeStatus(statusStr);
         const name =
             dockerContainer.Name || dockerContainer.Names?.[0] || "unknown";
 
