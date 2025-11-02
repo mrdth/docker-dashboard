@@ -353,5 +353,71 @@ describe("Container API Contracts", () => {
                 }
             }
         });
+
+        it("T131: GET /api/containers/{id} includes imageInfo with updateAvailable, latestVersion, registryStatus", async () => {
+            const listResponse = await request(wsApp)
+                .get("/api/containers")
+                .expect(200);
+
+            if (listResponse.body.containers.length > 0) {
+                const containerId = listResponse.body.containers[0].id;
+                const detailResponse = await request(wsApp)
+                    .get(`/api/containers/${containerId}`)
+                    .expect(200);
+
+                const container = detailResponse.body.container;
+
+                // Verify imageInfo structure
+                expect(container).toHaveProperty("imageInfo");
+                const imageInfo = container.imageInfo;
+
+                expect(imageInfo).toHaveProperty("updateAvailable");
+                expect(imageInfo).toHaveProperty("latestVersion");
+                expect(imageInfo).toHaveProperty("registryStatus");
+
+                // Verify types
+                expect(typeof imageInfo.updateAvailable).toBe("boolean");
+                expect(
+                    typeof imageInfo.latestVersion === "string" ||
+                        imageInfo.latestVersion === undefined,
+                ).toBe(true);
+                expect(["checked", "unable_to_check", "checking"]).toContain(
+                    imageInfo.registryStatus,
+                );
+            }
+        });
+
+        it("T132: imageInfo.updateAvailable=true only when latestVersion differs from currentVersion", async () => {
+            const listResponse = await request(wsApp)
+                .get("/api/containers")
+                .expect(200);
+
+            if (listResponse.body.containers.length > 0) {
+                const containerId = listResponse.body.containers[0].id;
+                const detailResponse = await request(wsApp)
+                    .get(`/api/containers/${containerId}`)
+                    .expect(200);
+
+                const container = detailResponse.body.container;
+                const imageInfo = container.imageInfo;
+
+                // Logic: updateAvailable should only be true if latestVersion exists and differs from image tag
+                if (imageInfo.updateAvailable === true) {
+                    expect(imageInfo.latestVersion).toBeDefined();
+                    expect(imageInfo.latestVersion).not.toBe(
+                        container.image.split(":")[1] || "latest",
+                    );
+                }
+
+                // If updateAvailable is false, either latestVersion is same or unavailable
+                if (imageInfo.updateAvailable === false) {
+                    if (imageInfo.latestVersion) {
+                        expect(imageInfo.latestVersion).toBe(
+                            container.image.split(":")[1] || "latest",
+                        );
+                    }
+                }
+            }
+        });
     });
 });

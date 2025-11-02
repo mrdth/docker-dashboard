@@ -33,6 +33,12 @@
                     >
                         Memory %
                     </th>
+                    <!-- T142: Add update indicator column -->
+                    <th
+                        class="px-6 py-3 text-center font-semibold text-gray-900"
+                    >
+                        Updates
+                    </th>
                     <th
                         class="px-6 py-3 text-center font-semibold text-gray-900"
                     >
@@ -91,6 +97,10 @@
                         />
                         <div v-else class="text-gray-400 text-sm">N/A</div>
                     </td>
+                    <!-- T142: Display update indicator -->
+                    <td class="px-6 py-4 text-center">
+                        <UpdateIndicator :image-info="container.imageInfo" />
+                    </td>
                     <td class="px-6 py-4 text-center">
                         <router-link
                             :to="`/containers/${container.id}`"
@@ -108,6 +118,7 @@
 <script setup lang="ts">
 import ContainerStatusBadge from "./ContainerStatusBadge.vue";
 import MetricsCell from "./MetricsCell.vue";
+import UpdateIndicator from "./UpdateIndicator.vue";
 import type { Container } from "../types/index";
 
 interface Props {

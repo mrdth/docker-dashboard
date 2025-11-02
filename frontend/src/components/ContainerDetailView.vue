@@ -34,6 +34,65 @@
             </div>
         </div>
 
+        <!-- T143: Image Update Info Section -->
+        <div v-if="container.imageInfo" class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                Image Information
+            </h3>
+
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                    <p class="text-gray-500">Image Name</p>
+                    <p class="font-mono text-gray-900">
+                        {{ container.imageInfo.name }}:{{
+                            container.imageInfo.tag
+                        }}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-gray-500">Update Status</p>
+                    <div class="mt-1">
+                        <UpdateIndicator :image-info="container.imageInfo" />
+                    </div>
+                </div>
+                <div>
+                    <p class="text-gray-500">Latest Version</p>
+                    <p class="text-gray-900">
+                        {{ container.imageInfo.latestVersion || "Unknown" }}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-gray-500">Last Checked</p>
+                    <p class="text-gray-900">
+                        {{
+                            container.imageInfo.lastChecked
+                                ? formatDate(container.imageInfo.lastChecked)
+                                : "Never"
+                        }}
+                    </p>
+                </div>
+                <div class="col-span-full">
+                    <p class="text-gray-500">Registry Status</p>
+                    <span
+                        class="inline-block px-2 py-1 rounded text-xs font-medium"
+                        :class="{
+                            'bg-green-100 text-green-800':
+                                container.imageInfo.registryStatus ===
+                                'checked',
+                            'bg-yellow-100 text-yellow-800':
+                                container.imageInfo.registryStatus ===
+                                'checking',
+                            'bg-gray-100 text-gray-800':
+                                container.imageInfo.registryStatus ===
+                                'unable_to_check',
+                        }"
+                    >
+                        {{ container.imageInfo.registryStatus }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
         <!-- T091: Metrics Section -->
         <div v-if="container.metrics" class="bg-white rounded-lg shadow p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Metrics</h3>
@@ -193,6 +252,7 @@
 import ContainerStatusBadge from "./ContainerStatusBadge.vue";
 import PortsList from "./PortsList.vue";
 import LogsViewer from "./LogsViewer.vue";
+import UpdateIndicator from "./UpdateIndicator.vue";
 import type { Container } from "../types/index";
 
 interface Props {

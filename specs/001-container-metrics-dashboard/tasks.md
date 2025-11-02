@@ -316,31 +316,31 @@ Each user story phase includes:
 
 ### Contract Tests for User Story 5
 
-- [ ] T131 [P] Write contract test GET /api/containers/{id} includes imageInfo with updateAvailable, latestVersion, registryStatus in tests/contract/containers.test.ts
-- [ ] T132 [P] Write contract test imageInfo.updateAvailable=true only when latestVersion differs from currentVersion in tests/contract/containers.test.ts
+- [x] T131 [P] Write contract test GET /api/containers/{id} includes imageInfo with updateAvailable, latestVersion, registryStatus in tests/contract/containers.test.ts
+- [x] T132 [P] Write contract test imageInfo.updateAvailable=true only when latestVersion differs from currentVersion in tests/contract/containers.test.ts
 
 ### Backend Implementation for User Story 5
 
-- [ ] T133 Implement backend/src/services/registry.service.ts for Docker Hub API integration: checkForUpdates(imageName, currentTag)
-- [ ] T134 [P] Implement Docker Hub API call: GET https://hub.docker.com/v2/repositories/{imageName}/tags/{tag} to fetch latest version
-- [ ] T135 [P] Implement update check caching: store last check timestamp, skip checks < 24 hours old
-- [ ] T136 [P] Handle private registry detection: parse image name, identify private registries (gcr.io, quay.io, etc), set registryStatus="unable_to_check"
-- [ ] T137 [P] Implement error handling: if Docker Hub unreachable, set registryStatus="unable_to_check", don't block container list
-- [ ] T138 Extend docker.service.ts: call registry.service for image update info, include in Container response as imageInfo field
-- [ ] T139 Implement background update check job: run every 24 hours per unique image, store results in memory cache with TTL
+- [x] T133 Implement backend/src/services/registry.service.ts for Docker Hub API integration: checkForUpdates(imageName, currentTag)
+- [x] T134 [P] Implement Docker Hub API call: GET https://hub.docker.com/v2/repositories/{imageName}/tags/{tag} to fetch latest version
+- [x] T135 [P] Implement update check caching: store last check timestamp, skip checks < 24 hours old
+- [x] T136 [P] Handle private registry detection: parse image name, identify private registries (gcr.io, quay.io, etc), set registryStatus="unable_to_check"
+- [x] T137 [P] Implement error handling: if Docker Hub unreachable, set registryStatus="unable_to_check", don't block container list
+- [x] T138 Extend docker.service.ts: call registry.service for image update info, include in Container response as imageInfo field
+- [x] T139 Implement background update check job: run every 24 hours per unique image, store results in memory cache with TTL
 
 ### Frontend Implementation for User Story 5
 
-- [ ] T140 Create frontend/src/components/UpdateIndicator.vue displaying "update available" badge with latestVersion on hover/click
-- [ ] T141 [P] Create frontend/src/components/UpdateIndicator.vue handling registryStatus: show "checked", "unable to check private registry", or "checking" states
-- [ ] T142 Extend frontend/src/components/ContainerListTable.vue: add update indicator column, show badge for containers with updateAvailable=true
-- [ ] T143 Extend frontend/src/components/ContainerDetailView.vue: show full image info including updateAvailable, latestVersion, lastChecked timestamp
+- [x] T140 Create frontend/src/components/UpdateIndicator.vue displaying "update available" badge with latestVersion on hover/click
+- [x] T141 [P] Create frontend/src/components/UpdateIndicator.vue handling registryStatus: show "checked", "unable to check private registry", or "checking" states
+- [x] T142 Extend frontend/src/components/ContainerListTable.vue: add update indicator column, show badge for containers with updateAvailable=true
+- [x] T143 Extend frontend/src/components/ContainerDetailView.vue: show full image info including updateAvailable, latestVersion, lastChecked timestamp
 
 ### Component Tests for User Story 5
 
-- [ ] T144 [P] Write component test for UpdateIndicator.vue: verify badge shown when updateAvailable=true
-- [ ] T145 [P] Write component test for UpdateIndicator.vue: verify latestVersion shown on hover/click
-- [ ] T146 [P] Write component test for UpdateIndicator.vue: verify "unable to check" message for private registries
+- [x] T144 [P] Write component test for UpdateIndicator.vue: verify badge shown when updateAvailable=true
+- [x] T145 [P] Write component test for UpdateIndicator.vue: verify latestVersion shown on hover/click
+- [x] T146 [P] Write component test for UpdateIndicator.vue: verify "unable to check" message for private registries
 
 **Checkpoint**: User Story 5 complete. Operators have visibility into image update availability.
 

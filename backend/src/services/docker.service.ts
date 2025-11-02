@@ -18,6 +18,7 @@ import {
     MetricsUnavailableError,
 } from "../models/errors";
 import { logError, log } from "../logger/index";
+import { getRegistryService } from "./registry.service";
 
 export class DockerService {
     private docker: Docker;
@@ -98,7 +99,15 @@ export class DockerService {
             const container = this.docker.getContainer(id);
             const inspect = await container.inspect();
 
-            return this.normalizeContainer(inspect);
+            const normalized = this.normalizeContainer(inspect);
+
+            // T138: Add imageInfo from registry service
+            const registryService = getRegistryService();
+            normalized.imageInfo = await registryService.checkForUpdates(
+                normalized.image,
+            );
+
+            return normalized;
         } catch (error) {
             if ((error as any).statusCode === 404) {
                 throw new ContainerNotFoundError(id);

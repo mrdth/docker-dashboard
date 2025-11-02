@@ -14,6 +14,7 @@ import { errorHandler, asyncHandler } from "./api/middleware/error-handler";
 import { handleWebSocketConnection } from "./websocket/handlers";
 import { HealthCheckResponse } from "./models/index";
 import containersRouter from "./api/routes/containers";
+import { getUpdateChecker } from "./services/update-checker";
 
 const logger = getLogger();
 const app = express();
@@ -141,6 +142,12 @@ async function startServer(): Promise<void> {
     try {
         // Initialize Docker service
         await initializeDockerService();
+
+        // T139: Start background update checker if Docker is available
+        if (dockerServiceReady) {
+            const updateChecker = getUpdateChecker();
+            updateChecker.start();
+        }
 
         // Start listening
         wsApp.listen(PORT, () => {
