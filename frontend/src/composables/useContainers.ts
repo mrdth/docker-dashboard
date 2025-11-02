@@ -131,7 +131,7 @@ export function useContainers(): UseContainersState & {
 
     /**
      * Handle WebSocket container_list message
-     * Merge new container data without overwriting existing metrics
+     * Merge new container data without overwriting existing metrics and imageInfo
      */
     function handleContainerListUpdate(message: any): void {
         const { containers: updatedContainers } = message.data;
@@ -144,14 +144,15 @@ export function useContainers(): UseContainersState & {
             updatedContainers.map((c: Container) => [c.id, c]),
         );
 
-        // Merge updated container data while preserving metrics
+        // Merge updated container data while preserving metrics and imageInfo
         const mergedContainers = containers.value.map((existing) => {
             const updated = updatedMap.get(existing.id);
             if (updated) {
-                // Merge: keep existing metrics, update other fields
+                // Merge: keep existing metrics and imageInfo, update other fields
                 return {
                     ...updated,
                     metrics: existing.metrics, // Preserve existing metrics
+                    imageInfo: existing.imageInfo, // Preserve existing imageInfo
                 };
             }
             return existing;
