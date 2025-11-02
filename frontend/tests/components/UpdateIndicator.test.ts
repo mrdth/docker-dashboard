@@ -55,7 +55,7 @@ describe("T144-T146: UpdateIndicator.vue", () => {
         expect(wrapper.text()).toContain("Latest: 2.0.5");
     });
 
-    it("displays nothing when updateAvailable=false", () => {
+    it("displays 'Up to date' when updateAvailable=false and checked", () => {
         const imageInfo: ImageInfo = {
             name: "nginx",
             tag: "1.0",
@@ -70,8 +70,14 @@ describe("T144-T146: UpdateIndicator.vue", () => {
             props: { imageInfo },
         });
 
-        // Should not display update badge
+        // Should display "Up to date" badge instead of update available
+        expect(wrapper.text()).toContain("Up to date");
         expect(wrapper.text()).not.toContain("Update available");
+
+        // Should have green styling for up-to-date status
+        const html = wrapper.html();
+        expect(html).toContain("bg-green-900");
+        expect(html).toContain("text-green-200");
     });
 
     it("T146: displays unable to check message for private registries", () => {
