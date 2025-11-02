@@ -45,26 +45,26 @@ Each user story phase includes:
 
 **Purpose**: Initialize project structure, dependencies, and development environment
 
-- [ ] T001 Create monorepo structure with backend/ and frontend/ directories
-- [ ] T002 Initialize backend project: `mkdir -p backend && cd backend && npm init -y`
-- [ ] T003 Install backend core dependencies: express@5.1.0, express-ws@5.0.2, dockerode@4.0.9, dotenv@17.2.3, winston@3.18.3 in backend/package.json
-- [ ] T004 Install backend dev dependencies: typescript@5.9.3, @types/express, @types/node, ts-node, vitest@4.0.6, supertest@7.1.4 in backend/package.json
-- [ ] T005 Create backend directory structure: src/{models,services,api/routes,api/middleware,websocket,logger}, tests/{contract,integration,unit} in backend/
-- [ ] T006 Initialize frontend project: `npm create vite@latest frontend -- --template vue-ts` from repo root
-- [ ] T007 Install frontend dependencies: vue@3.5.13, vite@7.1.12, tailwindcss@4.1.4, reka-ui@2.6.0 in frontend/package.json
-- [ ] T008 Install frontend dev dependencies: @vue/test-utils@2.4.6, vitest@4.0.6, happy-dom, postcss@8.5.3, autoprefixer@10.4.21 in frontend/package.json
-- [ ] T009 [P] Create backend/tsconfig.json with target: ES2020, module: commonjs, esModuleInterop: true
-- [ ] T010 [P] Create frontend/tsconfig.json with target: ES2020, module: ESNext, jsx: vue
-- [ ] T011 [P] Create backend/.env with DOCKER_HOST=/var/run/docker.sock, NODE_ENV=development, LOG_LEVEL=debug, PORT=3000
-- [ ] T012 [P] Create frontend/.env with VITE_API_URL=http://localhost:3000
-- [ ] T013 Create backend/vitest.config.ts with environment: node, coverage reporter
-- [ ] T014 Create frontend/vitest.config.ts with environment: happy-dom, coverage reporter
-- [ ] T015 [P] Create backend/vite.config.ts (or use Vite for backend if preferred) or configure ts-node for development
-- [ ] T016 Create frontend/vite.config.ts with proxy to backend /api -> http://localhost:3000
-- [ ] T017 [P] Create frontend/tailwind.config.ts with content paths pointing to src/**/*.{vue,ts,tsx}
-- [ ] T018 [P] Create frontend/postcss.config.cjs with tailwindcss and autoprefixer plugins
-- [ ] T019 Configure backend npm scripts in backend/package.json: dev (ts-node), build, test, test:watch, test:unit, test:integration, test:contract, lint
-- [ ] T020 Configure frontend npm scripts in frontend/package.json: dev (vite), build, preview, test, test:watch, test:ui, lint
+- [x] T001 Create monorepo structure with backend/ and frontend/ directories
+- [x] T002 Initialize backend project: `mkdir -p backend && cd backend && npm init -y`
+- [x] T003 Install backend core dependencies: express@5.1.0, express-ws@5.0.2, dockerode@4.0.9, dotenv@17.2.3, winston@3.18.3 in backend/package.json
+- [x] T004 Install backend dev dependencies: typescript@5.9.3, @types/express, @types/node, ts-node, vitest@4.0.6, supertest@7.1.4 in backend/package.json
+- [x] T005 Create backend directory structure: src/{models,services,api/routes,api/middleware,websocket,logger}, tests/{contract,integration,unit} in backend/
+- [x] T006 Initialize frontend project: `npm create vite@latest frontend -- --template vue-ts` from repo root
+- [x] T007 Install frontend dependencies: vue@3.5.13, vite@7.1.12, tailwindcss@4.1.4, reka-ui@2.6.0 in frontend/package.json
+- [x] T008 Install frontend dev dependencies: @vue/test-utils@2.4.6, vitest@4.0.6, happy-dom, postcss@8.5.3, autoprefixer@10.4.21 in frontend/package.json
+- [x] T009 [P] Create backend/tsconfig.json with target: ES2020, module: commonjs, esModuleInterop: true
+- [x] T010 [P] Create frontend/tsconfig.json with target: ES2020, module: ESNext, jsx: vue
+- [x] T011 [P] Create backend/.env with DOCKER_HOST=/var/run/docker.sock, NODE_ENV=development, LOG_LEVEL=debug, PORT=3000
+- [x] T012 [P] Create frontend/.env with VITE_API_URL=http://localhost:3000
+- [x] T013 Create backend/vitest.config.ts with environment: node, coverage reporter
+- [x] T014 Create frontend/vitest.config.ts with environment: happy-dom, coverage reporter
+- [x] T015 [P] Create backend/vite.config.ts (or use Vite for backend if preferred) or configure ts-node for development
+- [x] T016 Create frontend/vite.config.ts with proxy to backend /api -> http://localhost:3000
+- [x] T017 [P] Create frontend/tailwind.config.ts with content paths pointing to src/**/*.{vue,ts,tsx}
+- [x] T018 [P] Create frontend/postcss.config.cjs with tailwindcss and autoprefixer plugins
+- [x] T019 Configure backend npm scripts in backend/package.json: dev (ts-node), build, test, test:watch, test:unit, test:integration, test:contract, lint
+- [x] T020 Configure frontend npm scripts in frontend/package.json: dev (vite), build, preview, test, test:watch, test:ui, lint
 
 **Checkpoint**: Project structure initialized, dependencies installed, development environment ready
 

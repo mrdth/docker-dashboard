@@ -1,0 +1,35 @@
+{
+    "name": "backend",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "dev": "ts-node src/main.ts",
+        "build": "tsc",
+        "test": "vitest",
+        "test:watch": "vitest --watch",
+        "test:unit": "vitest --include='tests/unit/**/*.test.ts'",
+        "test:integration": "vitest --include='tests/integration/**/*.test.ts'",
+        "test:contract": "vitest --include='tests/contract/**/*.test.ts'",
+        "lint": "tsc --noEmit"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "commonjs",
+    "dependencies": {
+        "dockerode": "^4.0.9",
+        "dotenv": "^17.2.3",
+        "express": "^5.1.0",
+        "express-ws": "^5.0.2",
+        "winston": "^3.18.3"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.5",
+        "@types/node": "^24.9.2",
+        "supertest": "^7.1.4",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.9.3",
+        "vitest": "^4.0.6"
+    }
+}
