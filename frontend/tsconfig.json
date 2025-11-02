@@ -30,8 +30,10 @@
         "baseUrl": ".",
         "paths": {
             "@/*": ["./src/*"]
-        }
+        },
+        "types": ["vite/client"],
+        "typeRoots": ["./node_modules/@types"]
     },
-    "include": ["src"],
+    "include": ["src", "vite-env.d.ts"],
     "exclude": ["node_modules", "dist"]
 }

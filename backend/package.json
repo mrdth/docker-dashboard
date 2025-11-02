@@ -25,7 +25,9 @@
         "winston": "^3.18.3"
     },
     "devDependencies": {
+        "@types/dockerode": "^3.3.45",
         "@types/express": "^5.0.5",
+        "@types/express-ws": "^3.0.6",
         "@types/node": "^24.9.2",
         "supertest": "^7.1.4",
         "ts-node": "^10.9.2",
