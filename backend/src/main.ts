@@ -13,6 +13,7 @@ import { requestLoggerMiddleware } from "./api/middleware/request-logger";
 import { errorHandler, asyncHandler } from "./api/middleware/error-handler";
 import { handleWebSocketConnection } from "./websocket/handlers";
 import { HealthCheckResponse } from "./models/index";
+import containersRouter from "./api/routes/containers";
 
 const logger = getLogger();
 const app = express();
@@ -56,6 +57,9 @@ async function initializeDockerService(): Promise<void> {
 }
 
 // Routes
+
+// T059: Register API routes
+wsApp.use("/api/containers", containersRouter);
 
 /**
  * Health check endpoint
