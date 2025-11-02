@@ -281,28 +281,28 @@ Each user story phase includes:
 
 ### Contract Tests for User Story 4
 
-- [ ] T118 [P] Write contract test GET /api/containers?name=nginx returns only containers matching name substring in tests/contract/containers.test.ts
-- [ ] T119 [P] Write contract test GET /api/containers?status=running returns only containers with status=running in tests/contract/containers.test.ts
-- [ ] T120 [P] Write contract test GET /api/containers?name=nginx&status=running returns AND filter result in tests/contract/containers.test.ts
+- [x] T118 [P] Write contract test GET /api/containers?name=nginx returns only containers matching name substring in tests/contract/containers.test.ts
+- [x] T119 [P] Write contract test GET /api/containers?status=running returns only containers with status=running in tests/contract/containers.test.ts
+- [x] T120 [P] Write contract test GET /api/containers?name=nginx&status=running returns AND filter result in tests/contract/containers.test.ts
 
 ### Backend Implementation for User Story 4
 
-- [ ] T121 Extend backend/src/api/routes/containers.ts GET /api/containers to support name and status query parameters with validation
-- [ ] T122 [P] Implement filtering logic: case-insensitive substring match for name, exact match for status
+- [x] T121 Extend backend/src/api/routes/containers.ts GET /api/containers to support name and status query parameters with validation
+- [x] T122 [P] Implement filtering logic: case-insensitive substring match for name, exact match for status
 
 ### Frontend Implementation for User Story 4
 
-- [ ] T123 Create frontend/src/components/ContainerFilters.vue with search input for name and dropdown for status filter
-- [ ] T124 [P] Extend frontend/src/composables/useContainers.ts: add filters ref (name, status), implement client-side filtering of containers array
-- [ ] T125 [P] Extend frontend/src/pages/Dashboard.vue: add ContainerFilters component, bind filters to useContainers composable
-- [ ] T126 Implement search debounce: wait 300ms after user stops typing before filtering to reduce computation
-- [ ] T127 Add "clear filters" button: resets name and status filters to show all containers
+- [x] T123 Create frontend/src/components/ContainerFilters.vue with search input for name and dropdown for status filter
+- [x] T124 [P] Extend frontend/src/composables/useContainers.ts: add filters ref (name, status), implement client-side filtering of containers array
+- [x] T125 [P] Extend frontend/src/pages/Dashboard.vue: add ContainerFilters component, bind filters to useContainers composable
+- [x] T126 Implement search debounce: wait 300ms after user stops typing before filtering to reduce computation
+- [x] T127 Add "clear filters" button: resets name and status filters to show all containers
 
 ### Component Tests for User Story 4
 
-- [ ] T128 [P] Write component test for ContainerFilters.vue: verify search input and status dropdown render
-- [ ] T129 [P] Write component test for ContainerFilters.vue: verify @input events emit filter changes
-- [ ] T130 Write component test for ContainerListTable.vue with filters: verify only matching containers displayed
+- [x] T128 [P] Write component test for ContainerFilters.vue: verify search input and status dropdown render
+- [x] T129 [P] Write component test for ContainerFilters.vue: verify @input events emit filter changes
+- [x] T130 Write component test for ContainerListTable.vue with filters: verify only matching containers displayed
 
 **Checkpoint**: User Story 4 complete. Operators can efficiently find containers in large deployments.
 
