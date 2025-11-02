@@ -109,27 +109,30 @@
 
 ---
 
-### Component Library & Styling: shadcn-vue + Tailwind CSS
+### Component Library & Styling: Reka UI v2 + Tailwind CSS
 
-**Decision**: Use shadcn-vue (Vue port of shadcn/ui) with Tailwind CSS for UI components and styling
+**Decision**: Use Reka UI v2 (successor to Radix Vue v1) with Tailwind CSS for UI components and styling
 
 **Rationale**:
-- shadcn-vue: Copy-paste component library with beautiful, accessible components
-- Components are owned by the project (copy-based, not package-based)
-- Full customization without ejecting
-- Built on Radix Vue (headless components) and Tailwind CSS
-- Excellent for dashboard UIs (cards, tables, charts, forms)
+- Reka UI v2: Modern, LLM-optimized component library built on Radix primitives
+- Unstyled, flexible components with full customization control
+- Built on Radix primitives (proven, accessible foundation)
 - Tailwind CSS provides utility-first styling (fast, consistent)
+- Extensive component library: Form (13), Date/Time (7), General (22+) components
+- Accessibility-first with WAI-ARIA compliance and cross-browser testing
+- Server-side rendering support and i18n built-in
 - No additional CSS-in-JS runtime overhead
-- Excellent TypeScript support
+- Excellent TypeScript support with comprehensive documentation
+- Optimized for AI code generation workflows
 
 **Alternatives Considered**:
-- **Material UI**: Heavy, more components, steeper learning curve
+- **shadcn-vue**: Copy-paste model, but requires maintenance of local component copies
+- **Radix Vue v1**: Excellent but Reka UI v2 is the actively developed successor
+- **Material UI**: Heavy, more prescriptive, overkill for dashboard
 - **Headless UI**: More manual component building required
 - **Plain Tailwind**: Less pre-built components, more code needed
-- **Emotion (CSS-in-JS)**: Runtime overhead, not ideal for dashboards
 
-**Selected**: shadcn-vue components + Tailwind CSS
+**Selected**: Reka UI v2 components + Tailwind CSS
 
 ---
 
@@ -322,8 +325,7 @@
   "vite": "^5.x",
   "typescript": "^5.x",
   "tailwindcss": "^3.x",
-  "shadcn-vue": "^0.1.x",
-  "radix-vue": "^1.x",
+  "reka-ui": "^2.x",
   "vitest": "^1.x",
   "@vue/test-utils": "^2.x"
 }
@@ -348,6 +350,36 @@ export default defineConfig({
   }
 })
 ```
+
+---
+
+## References & Documentation
+
+**Key Resources for Implementation**:
+
+**Component Library & Styling**:
+- [Reka UI v2 LLM Documentation](https://reka-ui.com/llms.txt) — AI-optimized component docs for code generation
+- [Reka UI Official Docs](https://reka-ui.com) — Complete component library reference
+- [Tailwind CSS Documentation](https://tailwindcss.com) — Utility-first CSS framework
+
+**Backend & Infrastructure**:
+- [Docker SDK for Node.js (dockerode)](https://github.com/apocas/dockerode) — Docker API integration
+- [Docker API Documentation](https://docs.docker.com/engine/api/) — Official Docker REST API spec
+- [Express.js Documentation](https://expressjs.com/) — HTTP server framework
+- [WebSocket Library (ws)](https://github.com/websockets/ws) — Real-time bidirectional communication
+
+**Frontend & State Management**:
+- [Vue 3 Documentation](https://vuejs.org/) — Progressive JavaScript framework
+- [Vue 3 Composition API](https://vuejs.org/guide/extras/composition-api-faq.html) — Reactive state management
+- [Vite Documentation](https://vitejs.dev/) — Frontend build tool and dev server
+
+**Testing**:
+- [Vitest Documentation](https://vitest.dev/) — Unit and integration testing framework
+- [Vue Test Utils](https://test-utils.vuejs.org/) — Vue component testing library
+- [Supertest Documentation](https://github.com/visionmedia/supertest) — HTTP assertion library for Express
+
+**API Design**:
+- [OpenAPI Specification](https://spec.openapis.org/) — REST API contract specification
 
 ---
 

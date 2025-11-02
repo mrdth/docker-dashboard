@@ -81,8 +81,8 @@ npm install tailwindcss postcss autoprefixer
 npm install -D @vue/test-utils vitest happy-dom
 npx tailwindcss init -p
 
-# Install shadcn-vue (component library setup)
-npm install shadcn-vue @radix-vue radix-vue
+# Install Reka UI v2 (component library setup)
+npm install reka-ui
 ```
 
 **Vite + Vue 3 Development Server**:
@@ -300,58 +300,61 @@ export default WebSocketManager;
     <div v-if="isLoading" class="text-center py-8">
       <p class="text-gray-600">Loading containers...</p>
     </div>
-    <div v-else>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>CPU</TableHead>
-            <TableHead>Memory</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow v-for="container in containers" :key="container.id">
-            <TableCell>{{ container.name }}</TableCell>
-            <TableCell>
-              <Badge :variant="statusVariant(container.status)">
+    <div v-else class="overflow-x-auto">
+      <table class="w-full border-collapse">
+        <thead>
+          <tr class="border-b">
+            <th class="text-left px-4 py-2 font-semibold">Name</th>
+            <th class="text-left px-4 py-2 font-semibold">Status</th>
+            <th class="text-left px-4 py-2 font-semibold">CPU</th>
+            <th class="text-left px-4 py-2 font-semibold">Memory</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="container in containers" :key="container.id" class="border-b hover:bg-gray-50">
+            <td class="px-4 py-2">{{ container.name }}</td>
+            <td class="px-4 py-2">
+              <span :class="[
+                'px-3 py-1 rounded-full text-sm font-medium',
+                statusClasses(container.status)
+              ]">
                 {{ container.status }}
-              </Badge>
-            </TableCell>
-            <TableCell>
+              </span>
+            </td>
+            <td class="px-4 py-2">
               {{ metrics[container.id]?.cpu.percentage.toFixed(1) || 'N/A' }}%
-            </TableCell>
-            <TableCell>
+            </td>
+            <td class="px-4 py-2">
               {{ metrics[container.id]?.memory.percentage.toFixed(1) || 'N/A' }}%
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
 import { useContainers } from '@/composables/useContainers'
 import { useMetrics } from '@/composables/useMetrics'
 
 const { containers, isLoading } = useContainers()
 const { metrics } = useMetrics()
 
-const statusVariant = (status: string) => {
-  const variants: Record<string, string> = {
-    running: 'default',
-    stopped: 'secondary',
-    paused: 'outline',
-    exited: 'destructive'
+const statusClasses = (status: string) => {
+  const classes: Record<string, string> = {
+    running: 'bg-green-100 text-green-800',
+    stopped: 'bg-gray-100 text-gray-800',
+    paused: 'bg-yellow-100 text-yellow-800',
+    exited: 'bg-red-100 text-red-800'
   }
-  return variants[status] || 'secondary'
+  return classes[status] || 'bg-gray-100 text-gray-800'
 }
 </script>
 ```
+
+**Note**: Reka UI v2 is an unstyled, headless component library. For rapid prototyping, we use semantic HTML with Tailwind CSS utility classes. For complex components (Dialogs, Dropdowns, Modals), use Reka UI primitives with custom Tailwind styling.
 
 **File**: `frontend/src/composables/useMetrics.ts`
 
@@ -695,10 +698,10 @@ wscat -c ws://localhost:3000/api/metrics/stream
 | `backend/src/logger/index.ts` | Structured logging |
 | `frontend/src/composables/useMetrics.ts` | WebSocket connection, metrics state (Vue Composition API) |
 | `frontend/src/composables/useContainers.ts` | REST API calls for container list |
-| `frontend/src/components/ContainerList.vue` | Container list UI with shadcn-vue Table & Badge |
-| `frontend/src/components/MetricsPanel.vue` | Metrics visualization with Tailwind CSS |
+| `frontend/src/components/ContainerList.vue` | Container list UI with semantic HTML and Tailwind CSS |
+| `frontend/src/components/MetricsPanel.vue` | Metrics visualization with Reka UI components and Tailwind CSS |
 | `frontend/vite.config.ts` | Vite configuration with Vue 3 plugin, API proxy |
-| `frontend/tailwind.config.ts` | Tailwind CSS configuration for shadcn-vue |
+| `frontend/tailwind.config.ts` | Tailwind CSS configuration |
 
 ---
 
@@ -776,8 +779,20 @@ docker stats --no-stream
 
 ## References
 
-- [Docker SDK for Node.js](https://github.com/apocas/dockerode)
-- [Express.js Documentation](https://expressjs.com/)
-- [React Documentation](https://react.dev/)
-- [WebSocket Protocol RFC 6455](https://tools.ietf.org/html/rfc6455)
-- [OpenAPI Specification](https://spec.openapis.org/)
+**Component Library & Styling**:
+- [Reka UI v2 LLM Documentation](https://reka-ui.com/llms.txt) — AI-optimized component docs for code generation
+- [Reka UI Official Docs](https://reka-ui.com) — Complete component library reference
+- [Tailwind CSS Documentation](https://tailwindcss.com) — Utility-first CSS framework
+
+**Backend & Infrastructure**:
+- [Docker SDK for Node.js](https://github.com/apocas/dockerode) — Docker API integration
+- [Express.js Documentation](https://expressjs.com/) — HTTP server framework
+- [WebSocket Protocol RFC 6455](https://tools.ietf.org/html/rfc6455) — Real-time communication spec
+
+**Frontend & State Management**:
+- [Vue 3 Documentation](https://vuejs.org/) — Progressive JavaScript framework
+- [Vue 3 Composition API](https://vuejs.org/guide/extras/composition-api-faq.html) — Reactive state management
+- [Vite Documentation](https://vitejs.dev/) — Frontend build tool and dev server
+
+**API Design**:
+- [OpenAPI Specification](https://spec.openapis.org/) — REST API contract specification
