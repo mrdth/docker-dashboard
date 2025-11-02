@@ -78,49 +78,49 @@ Each user story phase includes:
 
 ### Logger Setup
 
-- [ ] T021 Create backend/src/logger/index.ts with Winston logger configuration (console transport for dev, JSON for production)
-- [ ] T022 [P] Create backend/src/logger/types.ts with LogLevel, LogContext, LogEntry type definitions
+- [x] T021 Create backend/src/logger/index.ts with Winston logger configuration (console transport for dev, JSON for production)
+- [x] T022 [P] Create backend/src/logger/types.ts with LogLevel, LogContext, LogEntry type definitions
 
 ### Docker Service Foundation
 
-- [ ] T023 Create backend/src/services/docker.service.ts with constructor accepting DOCKER_HOST env var, verify Docker version on init
-- [ ] T024 [P] Create backend/src/models/index.ts with TypeScript interfaces: Container, ContainerMetrics, Port, LogEntry, Image matching data-model.md
-- [ ] T025 [P] Create backend/src/models/errors.ts with custom error classes: DockerDaemonError, ContainerNotFoundError, MetricsUnavailableError
-- [ ] T026 Implement docker.service.ts method: `async listContainers()` returning normalized Container[] with status mapping (running/stopped/paused/exited)
-- [ ] T027 [P] Implement docker.service.ts method: `async getContainer(id: string)` returning single Container with full details
-- [ ] T028 [P] Implement docker.service.ts method: `async getContainerStats(id: string)` returning ContainerMetrics with CPU%, memory, disk I/O, network I/O calculations
-- [ ] T029 [P] Implement docker.service.ts method: `async getPorts(id: string)` returning Port[] with protocol, containerPort, hostPort
-- [ ] T030 [P] Implement docker.service.ts method: `async getLogs(id: string)` returning LogEntry[] (last 100 lines, 1-hour window)
-- [ ] T031 [P] Implement docker.service.ts method: `async getImageInfo(imageName: string)` returning Image with update availability info
-- [ ] T032 Implement docker.service.ts health check: `async verifyVersion()` ensuring Docker API v1.40+, throw DockerDaemonError if unavailable
-- [ ] T033 [P] Implement docker.service.ts error handling: wrap Docker API errors in custom error classes with clear messages
+- [x] T023 Create backend/src/services/docker.service.ts with constructor accepting DOCKER_HOST env var, verify Docker version on init
+- [x] T024 [P] Create backend/src/models/index.ts with TypeScript interfaces: Container, ContainerMetrics, Port, LogEntry, Image matching data-model.md
+- [x] T025 [P] Create backend/src/models/errors.ts with custom error classes: DockerDaemonError, ContainerNotFoundError, MetricsUnavailableError
+- [x] T026 Implement docker.service.ts method: `async listContainers()` returning normalized Container[] with status mapping (running/stopped/paused/exited)
+- [x] T027 [P] Implement docker.service.ts method: `async getContainer(id: string)` returning single Container with full details
+- [x] T028 [P] Implement docker.service.ts method: `async getContainerStats(id: string)` returning ContainerMetrics with CPU%, memory, disk I/O, network I/O calculations
+- [x] T029 [P] Implement docker.service.ts method: `async getPorts(id: string)` returning Port[] with protocol, containerPort, hostPort
+- [x] T030 [P] Implement docker.service.ts method: `async getLogs(id: string)` returning LogEntry[] (last 100 lines, 1-hour window)
+- [x] T031 [P] Implement docker.service.ts method: `async getImageInfo(imageName: string)` returning Image with update availability info
+- [x] T032 Implement docker.service.ts health check: `async verifyVersion()` ensuring Docker API v1.40+, throw DockerDaemonError if unavailable
+- [x] T033 [P] Implement docker.service.ts error handling: wrap Docker API errors in custom error classes with clear messages
 
 ### Express App Initialization
 
-- [ ] T034 Create backend/src/main.ts with Express app setup, load env vars, initialize Docker service with health check
-- [ ] T035 [P] Create backend/src/api/middleware/error-handler.ts with global error middleware handling DockerDaemonError (503), validation errors (400), not found (404)
-- [ ] T036 [P] Create backend/src/api/middleware/cors.ts with CORS middleware allowing frontend origin from FRONTEND_URL env var
-- [ ] T037 Create backend/src/api/middleware/request-logger.ts with Winston logger middleware logging all requests with timestamp, method, path, response code
+- [x] T034 Create backend/src/main.ts with Express app setup, load env vars, initialize Docker service with health check
+- [x] T035 [P] Create backend/src/api/middleware/error-handler.ts with global error middleware handling DockerDaemonError (503), validation errors (400), not found (404)
+- [x] T036 [P] Create backend/src/api/middleware/cors.ts with CORS middleware allowing frontend origin from FRONTEND_URL env var
+- [x] T037 Create backend/src/api/middleware/request-logger.ts with Winston logger middleware logging all requests with timestamp, method, path, response code
 
 ### WebSocket Foundation
 
-- [ ] T038 Create backend/src/websocket/manager.ts with WebSocket client set management, broadcast function, reconnection logic
-- [ ] T039 [P] Create backend/src/websocket/message-types.ts with type definitions for all WebSocket message types (metrics_update, container_status_changed, ping, pong, errors, etc)
-- [ ] T040 Create backend/src/websocket/handlers.ts with message handlers for client messages: ready, get_containers, get_container_detail, close, pong
+- [x] T038 Create backend/src/websocket/manager.ts with WebSocket client set management, broadcast function, reconnection logic
+- [x] T039 [P] Create backend/src/websocket/message-types.ts with type definitions for all WebSocket message types (metrics_update, container_status_changed, ping, pong, errors, etc)
+- [x] T040 Create backend/src/websocket/handlers.ts with message handlers for client messages: ready, get_containers, get_container_detail, close, pong
 
 ### Frontend API Client Foundation
 
-- [ ] T041 Create frontend/src/types/index.ts with TypeScript interfaces matching backend models: Container, ContainerMetrics, Port, LogEntry, Image, WebSocketMessage
-- [ ] T042 [P] Create frontend/src/services/api.ts with HTTP client factory function and CORS-safe fetch wrapper (Content-Type, error handling)
-- [ ] T043 Create frontend/src/services/websocket.ts with WebSocket connection manager: connect(), disconnect(), send(), onMessage handlers, auto-reconnect with exponential backoff
-- [ ] T044 [P] Create frontend/src/composables/useWebSocket.ts exporting reactive websocket connection state and message handlers
+- [x] T041 Create frontend/src/types/index.ts with TypeScript interfaces matching backend models: Container, ContainerMetrics, Port, LogEntry, Image, WebSocketMessage
+- [x] T042 [P] Create frontend/src/services/api.ts with HTTP client factory function and CORS-safe fetch wrapper (Content-Type, error handling)
+- [x] T043 Create frontend/src/services/websocket.ts with WebSocket connection manager: connect(), disconnect(), send(), onMessage handlers, auto-reconnect with exponential backoff
+- [x] T044 [P] Create frontend/src/composables/useWebSocket.ts exporting reactive websocket connection state and message handlers
 
 ### Frontend Component Foundations
 
-- [ ] T045 [P] Create frontend/src/main.ts as Vue app entry point with createApp, mount to #app
-- [ ] T046 Create frontend/src/App.vue with basic layout: header, sidebar, main content area, error banner component slot
-- [ ] T047 [P] Create frontend/src/components/ErrorBanner.vue displaying error messages with auto-dismiss, appears when Docker daemon unavailable or metrics fail
-- [ ] T048 [P] Create frontend/src/components/LoadingSpinner.vue showing animated spinner during data loads
+- [x] T045 [P] Create frontend/src/main.ts as Vue app entry point with createApp, mount to #app
+- [x] T046 Create frontend/src/App.vue with basic layout: header, sidebar, main content area, error banner component slot
+- [x] T047 [P] Create frontend/src/components/ErrorBanner.vue displaying error messages with auto-dismiss, appears when Docker daemon unavailable or metrics fail
+- [x] T048 [P] Create frontend/src/components/LoadingSpinner.vue showing animated spinner during data loads
 
 **Checkpoint**: All foundational infrastructure in place - ready to implement User Stories in parallel
 
