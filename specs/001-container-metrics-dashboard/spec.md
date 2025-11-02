@@ -52,7 +52,7 @@ A Docker operator needs to see which ports containers expose/map to quickly acce
 **Acceptance Scenarios**:
 
 1. **Given** containers expose ports, **When** the operator views a container, **Then** exposed ports and mapped host ports are displayed (e.g., "80:8080/tcp")
-2. **Given** a container has recent logs, **When** the operator views the container detail, **Then** the last 5-10 log lines are shown or a summary of recent activity is visible
+2. **Given** a container has recent logs, **When** the operator views the container detail, **Then** the last 5-10 log lines are shown in the LogsViewer component with timestamps and monospace formatting
 3. **Given** a container has no exposed ports, **When** the operator views it, **Then** "no ports exposed" is clearly shown
 4. **Given** container logs are available, **When** the operator views the logs summary, **Then** the most recent log entries (last 5 minutes) are prioritized
 

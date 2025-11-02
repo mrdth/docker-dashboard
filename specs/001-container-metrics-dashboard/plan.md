@@ -23,6 +23,45 @@
 **Constraints**: <200ms p95 API latency, real-time metrics via WebSocket with REST fallback  
 **Scale/Scope**: Single Docker host, up to 100 containers, Docker API v1.40+
 
+## Performance & Display Strategy
+
+### High CPU/Memory Value Handling (FR-011)
+
+**Design Decision**: Display CPU and memory percentages accurately without normalization or capping. Multi-core CPUs can legitimately exceed 100%.
+
+**Rendering Rules**:
+1. **CPU Percentage**: Display full value without cap (e.g., "250%", "500%")
+   - Does NOT need normalization (multi-core is expected)
+   - Can exceed 100% (2 cores busy = 200% on 2-core system, 50% on 4-core)
+   - UI scales font or abbreviates if value exceeds 999% (rare case)
+
+2. **Memory Percentage**: Capped at 100% (no swap/page file display)
+   - Always 0-100%, represents usage / limit * 100
+   - Limit is system memory, does not include cache/buffers
+
+3. **UI Rendering** (MetricsCell.vue):
+   - Layout: Use flex/grid with overflow handling
+   - Abbreviation (if needed): Values >999% shown as "999%+" or scientific notation
+   - Tooltip: Hover shows full CPU count and detailed breakdown (e.g., "4 cores, 1.25 cores busy = 125%")
+
+4. **Example Values**:
+   - Single-core system with busy CPU: "100%"
+   - 4-core system with 2 cores busy: "50%"
+   - 4-core system with all 4 cores busy: "100%"
+   - 4-core system with burst (overcommit/hyperthreading): "150%", "200%", etc.
+   - Memory: "45%" (means 45% of limit used), max "100%"
+
+5. **No Truncation**: CSS overflow handling prevents silent truncation; font scaling enables large values
+
+### Logs Display Component: LogsViewer
+
+The "logs summary" feature (User Story 3) is implemented as the **LogsViewer** component:
+- **Location**: frontend/src/components/LogsViewer.vue
+- **Functionality**: Displays last 100 log lines fetched from Docker API (shows 10 most recent in scrollable panel)
+- **Display format**: Timestamps (left-aligned), messages (monospace), optional stdout/stderr indicator
+- **Data source**: Fresh fetch from Docker API on container detail page open
+- **Retention**: 1-hour rolling window in backend memory
+
 ## References & Documentation
 
 **Key Resources for Implementation**:

@@ -112,6 +112,20 @@ Notes:
 | `networkIo.sentBytesPerSec` | number | ≥0 | Send throughput (bytes/sec) |
 | `status` | enum | One of: `available`, `unavailable` | Whether metrics are valid or stale |
 
+### CPU Percentage Special Cases & Display Examples
+
+| Scenario | Value | Display | UI Color | Notes |
+|----------|-------|---------|----------|-------|
+| Single-core, idle | 0% | "0%" | Green | Minimal resource usage |
+| Single-core, busy | 100% | "100%" | Red | Full core utilized |
+| 4-core, 1 busy | 25% | "25%" | Green | One core working |
+| 4-core, 2 busy | 50% | "50%" | Yellow | Two cores working |
+| 4-core, all busy | 100% | "100%" | Red | All cores utilized |
+| 4-core, overcommit | 150% | "150%" | Red | Oversubscribed, needs investigation |
+| 8-core, all busy | 100% | "100%" | Red | Full utilization |
+
+**Rendering in UI**: Values display as-is without capping or normalization. Font scaling used for larger percentages to prevent text truncation.
+
 ### Validation Rules
 
 - `cpu.percentage`: Must be ≥0, can exceed 100% on multi-core systems
