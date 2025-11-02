@@ -41,13 +41,32 @@
             </h3>
 
             <div class="grid grid-cols-2 gap-4 text-sm">
-                <div>
+                <div class="col-span-full">
                     <p class="text-gray-500">Image Name</p>
                     <p class="font-mono text-gray-900">
                         {{ container.imageInfo.name }}:{{
                             container.imageInfo.tag
                         }}
                     </p>
+                </div>
+                <div>
+                    <p class="text-gray-500">Registry Status</p>
+                    <span
+                        class="inline-block px-2 py-1 rounded text-xs font-medium"
+                        :class="{
+                            'bg-green-100 text-green-800':
+                                container.imageInfo.registryStatus ===
+                                'checked',
+                            'bg-yellow-100 text-yellow-800':
+                                container.imageInfo.registryStatus ===
+                                'checking',
+                            'bg-gray-100 text-gray-800':
+                                container.imageInfo.registryStatus ===
+                                'unable_to_check',
+                        }"
+                    >
+                        {{ container.imageInfo.registryStatus }}
+                    </span>
                 </div>
                 <div>
                     <p class="text-gray-500">Update Status</p>
@@ -70,25 +89,6 @@
                                 : "Never"
                         }}
                     </p>
-                </div>
-                <div class="col-span-full">
-                    <p class="text-gray-500">Registry Status</p>
-                    <span
-                        class="inline-block px-2 py-1 rounded text-xs font-medium"
-                        :class="{
-                            'bg-green-100 text-green-800':
-                                container.imageInfo.registryStatus ===
-                                'checked',
-                            'bg-yellow-100 text-yellow-800':
-                                container.imageInfo.registryStatus ===
-                                'checking',
-                            'bg-gray-100 text-gray-800':
-                                container.imageInfo.registryStatus ===
-                                'unable_to_check',
-                        }"
-                    >
-                        {{ container.imageInfo.registryStatus }}
-                    </span>
                 </div>
             </div>
         </div>

@@ -15,7 +15,7 @@
                     type="text"
                     placeholder="Filter by container name..."
                     @input="handleNameChange"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
             </div>
 
@@ -31,7 +31,7 @@
                     id="status-filter"
                     :value="filters.status"
                     @change="handleStatusChange"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-4 py-2 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                     <option value="">All Statuses</option>
                     <option value="running">Running</option>

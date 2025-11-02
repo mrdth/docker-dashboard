@@ -4,12 +4,7 @@
             <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
                     <th class="px-6 py-3 text-left font-semibold text-gray-900">
-                        Name
-                    </th>
-                    <th
-                        class="px-6 py-3 text-center font-semibold text-gray-900"
-                    >
-                        Container ID
+                        Container
                     </th>
                     <th
                         class="px-6 py-3 text-center font-semibold text-gray-900"
@@ -31,7 +26,7 @@
                     <th
                         class="px-6 py-3 text-center font-semibold text-gray-900"
                     >
-                        Memory %
+                        MEM %
                     </th>
                     <!-- T142: Add update indicator column -->
                     <th
@@ -55,14 +50,12 @@
                     <td class="px-6 py-4">
                         <div class="font-medium text-gray-900">
                             {{ container.name }}
+                            <code
+                                class="text-xs bg-gray-100 px-2 py-1 mt-2 rounded text-gray-700"
+                            >
+                                {{ container.id.substring(0, 12) }}
+                            </code>
                         </div>
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                        <code
-                            class="text-xs bg-gray-100 px-2 py-1 rounded text-gray-700"
-                        >
-                            {{ container.id.substring(0, 12) }}
-                        </code>
                     </td>
                     <td class="px-6 py-4 text-center">
                         <ContainerStatusBadge :status="container.status" />
