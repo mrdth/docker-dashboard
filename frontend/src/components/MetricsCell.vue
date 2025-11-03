@@ -2,13 +2,21 @@
     <div class="flex flex-col items-center gap-2">
         <!-- T090: Display percentage with color coding and responsive font scaling -->
         <div
-            class="px-2 py-1 rounded font-mono text-sm"
+            class="px-2 py-1 rounded font-mono text-sm relative"
             :class="metricsClass"
             :title="tooltipText"
         >
             <!-- Handle large values with abbreviated notation if needed -->
             <span v-if="displayValue > 999">{{ abbreviatedValue }}</span>
             <span v-else>{{ displayValue }}%</span>
+            <!-- T151: Stale indicator for metrics older than 30 seconds -->
+            <span
+                v-if="isStale"
+                class="ml-1 text-xs opacity-75"
+                title="Metric data is stale (>30 seconds old)"
+            >
+                🔄
+            </span>
         </div>
         <!-- Visual progress indicator -->
         <div class="w-16 h-2 bg-gray-200 rounded overflow-hidden">
@@ -27,9 +35,12 @@ import { computed } from "vue";
 interface Props {
     value: number; // The percentage value (0-100 for memory, 0+ for CPU)
     type: "cpu" | "memory"; // Type of metric
+    lastUpdated?: Date; // T151: Optional timestamp for stale indicator
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+    lastUpdated: undefined,
+});
 
 /**
  * T090: Calculate display value and styling based on metric percentage
@@ -107,9 +118,37 @@ const tooltipText = computed(() => {
         return `Memory: ${displayValue.value}%`;
     }
 });
+
+/**
+ * T151: Check if metric is stale (older than 30 seconds)
+ */
+const isStale = computed(() => {
+    if (!props.lastUpdated) {
+        return false;
+    }
+
+    const now = new Date().getTime();
+    const lastUpdate = new Date(props.lastUpdated).getTime();
+    const ageInSeconds = (now - lastUpdate) / 1000;
+
+    return ageInSeconds > 30;
+});
 </script>
 
 <style scoped>
+/* T092: Smooth metric update animations */
+.px-2.py-1 {
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease;
+}
+
+.h-full {
+    transition:
+        width 0.4s ease-in-out,
+        background-color 0.3s ease;
+}
+
 /* Responsive font scaling for large values */
 @media (max-width: 768px) {
     :deep() .px-2.py-1 {

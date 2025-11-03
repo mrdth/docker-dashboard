@@ -22,6 +22,11 @@ interface UseContainersState {
     lastUpdated: Ref<Date | null>;
 }
 
+// T157: Cache configuration for container list
+const CACHE_TTL_MS = 30000; // 30 seconds
+let cachedContainers: Container[] | null = null;
+let lastCacheTime: number | null = null;
+
 export function useContainers(): UseContainersState & {
     fetchContainers: () => Promise<void>;
 } {
@@ -66,12 +71,27 @@ export function useContainers(): UseContainersState & {
 
     /**
      * T066: Fetch containers from REST API with metrics
+     * T157: Use cache with 30s TTL to reduce REST calls
      */
     async function fetchContainers(): Promise<void> {
         loading.value = true;
         error.value = null;
 
         try {
+            // T157: Check cache first
+            const now = Date.now();
+            if (
+                cachedContainers &&
+                lastCacheTime &&
+                now - lastCacheTime < CACHE_TTL_MS
+            ) {
+                // Use cached data
+                containers.value = cachedContainers;
+                lastUpdated.value = new Date();
+                loading.value = false;
+                return;
+            }
+
             const response = await get<{
                 containers: Container[];
                 error: null;
@@ -103,6 +123,10 @@ export function useContainers(): UseContainersState & {
 
                 containers.value = containersWithMetrics;
                 lastUpdated.value = new Date();
+
+                // T157: Update cache
+                cachedContainers = containersWithMetrics;
+                lastCacheTime = Date.now();
             }
         } catch (err) {
             error.value =

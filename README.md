@@ -2,6 +2,17 @@
 
 A real-time, web-based dashboard for monitoring Docker containers with metrics, status tracking, port mappings, logs, and image update notifications.
 
+**Status**: ✅ MVP Ready | **Phase**: 8 of 8 (95% Complete) | **Tests**: Contract, Integration, Unit, Component
+
+## Documentation
+
+> 📚 **New Documentation**: This project now includes comprehensive documentation for all aspects:
+> - **[backend/README.md](backend/README.md)** - Backend setup, API endpoints, WebSocket protocol, testing
+> - **[frontend/README.md](frontend/README.md)** - Frontend components, composables, dev server, testing
+> - **[API_CONTRACTS.md](API_CONTRACTS.md)** - Complete REST and WebSocket API specification
+> - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development workflow, testing strategy, code standards
+> - **[DEPLOYMENT.md](DEPLOYMENT.md)** - Docker, Kubernetes, SSL/TLS, monitoring, troubleshooting
+
 ## Features
 
 ### 📊 Container Monitoring
@@ -54,14 +65,30 @@ A real-time, web-based dashboard for monitoring Docker containers with metrics, 
 - **Storage**: In-memory (no persistence)
 - **Real-time**: WebSocket with REST fallback
 
-## Getting Started
+## Quick Start
 
-### Prerequisites
+### Easiest Way: Docker Compose
+
+```bash
+git clone <repository-url>
+cd docker-dashboard
+docker-compose up -d
+```
+
+Then open:
+- **Frontend**: http://localhost:5173
+- **Backend**: http://localhost:3000
+
+This runs both backend and frontend in containers with Docker socket access.
+
+### Manual Installation
+
+#### Prerequisites
 - Node.js 20 or later
 - Docker daemon running
 - Docker socket accessible at `/var/run/docker.sock` (or configure via `DOCKER_HOST`)
 
-### Installation
+#### Steps
 
 1. Clone the repository:
 ```bash
@@ -168,99 +195,59 @@ docker-dashboard/
 
 ## API Endpoints
 
-### REST API
+For **complete API documentation**, see [API_CONTRACTS.md](API_CONTRACTS.md).
 
-#### GET `/api/containers`
+### REST API Quick Reference
+
+#### `GET /api/containers`
 List all containers with optional filtering.
 
-**Query Parameters:**
-- `status` - Filter by status (running, stopped, paused, exited)
-- `name` - Filter by container name (substring match, case-insensitive)
-
-**Response:**
-```json
-{
-  "containers": [
-    {
-      "id": "2525c379837b",
-      "fullId": "2525c379837b43b9a33991e5fa5033a9d8cba039be315a9fec91cce57badfe57",
-      "name": "nginx",
-      "status": "running",
-      "image": "nginx:latest",
-      "created": 1762016111,
-      "ports": [],
-      "metrics": { /* metrics object */ },
-      "imageInfo": { /* image update info */ },
-      "logs": [ /* recent log lines */ ]
-    }
-  ],
-  "error": null,
-  "timestamp": "2025-11-02T19:53:29.528Z"
-}
+```bash
+curl http://localhost:3000/api/containers?status=running&name=nginx
 ```
 
-#### GET `/api/containers/{id}`
+**Response**: Array of containers with metrics, ports, logs, and image info.
+
+#### `GET /api/containers/{id}`
 Get detailed information for a specific container.
 
-**Response:** Single container object with full metrics, ports, logs, and imageInfo.
-
-#### GET `/health`
-Health check endpoint.
-
-**Response:**
-```json
-{
-  "status": "ok",
-  "docker": "ok",
-  "timestamp": "2025-11-02T19:53:29.528Z"
-}
+```bash
+curl http://localhost:3000/api/containers/2525c379837b
 ```
 
-### WebSocket API
+#### `GET /health`
+Health check endpoint (Docker daemon status).
+
+```bash
+curl http://localhost:3000/health
+# Returns 200 if healthy, 503 if Docker unavailable
+```
+
+### WebSocket API Quick Reference
 
 #### Connection
-Connect to `ws://localhost:3000/api/metrics/stream`
+```javascript
+const ws = new WebSocket('ws://localhost:3000/api/metrics/stream')
+
+ws.onopen = () => {
+  ws.send(JSON.stringify({ type: 'ready' }))
+}
+
+ws.onmessage = (event) => {
+  const msg = JSON.parse(event.data)
+  console.log(msg.type, msg.data)
+}
+```
 
 #### Message Types
 
-**client → server: ready**
-```json
-{ "type": "ready" }
-```
+- **`container_list`** - List of all containers
+- **`metrics_update`** - CPU, memory, disk I/O, network I/O for a container
+- **`container_status_changed`** - Container status changed (running/stopped/paused/exited)
+- **`ping`** - Server keep-alive (respond with `pong`)
+- **`error`** - Error message with code and reason
 
-**server → client: metrics_update**
-```json
-{
-  "type": "metrics_update",
-  "data": {
-    "containerId": "2525c379837b",
-    "metrics": { /* metrics object */ },
-    "timestamp": "2025-11-02T19:53:29.528Z"
-  }
-}
-```
-
-**server → client: container_status_changed**
-```json
-{
-  "type": "container_status_changed",
-  "data": {
-    "containerId": "2525c379837b",
-    "status": "running"
-  }
-}
-```
-
-**server → client: error**
-```json
-{
-  "type": "error",
-  "data": {
-    "code": "DOCKER_DAEMON_UNAVAILABLE",
-    "reason": "Docker daemon is not available"
-  }
-}
-```
+**See [API_CONTRACTS.md](API_CONTRACTS.md) for complete specifications with examples.**
 
 ## Testing
 
@@ -324,6 +311,35 @@ npm run test -- --coverage
 4. Updates container state when metrics_update or status_changed messages arrive
 5. Applies filters and renders container list with current data
 
+## Deployment
+
+For comprehensive deployment instructions, see **[DEPLOYMENT.md](DEPLOYMENT.md)**.
+
+### Docker Compose (Development/Testing)
+```bash
+docker-compose up -d
+```
+
+### Docker (Production)
+```bash
+docker build -f backend/Dockerfile -t dashboard-backend .
+docker build -f frontend/Dockerfile -t dashboard-frontend .
+
+docker run -d -v /var/run/docker.sock:/var/run/docker.sock \
+  -e DOCKER_HOST=/var/run/docker.sock \
+  -e FRONTEND_URL=https://your-domain.com \
+  -p 3000:3000 \
+  dashboard-backend
+
+docker run -d -p 80:80 dashboard-frontend
+```
+
+### Kubernetes
+See [DEPLOYMENT.md](DEPLOYMENT.md) for Kubernetes YAML examples and StatefulSet configuration.
+
+### SSL/TLS
+Use nginx reverse proxy with Let's Encrypt. See [DEPLOYMENT.md](DEPLOYMENT.md) for complete setup.
+
 ## Troubleshooting
 
 ### Docker daemon unavailable
@@ -348,11 +364,16 @@ npm run test -- --coverage
 
 ## Contributing
 
+For detailed development guidelines, testing strategy, and code standards, see **[CONTRIBUTING.md](CONTRIBUTING.md)**.
+
+Quick overview:
 1. Create a feature branch: `git checkout -b feature/your-feature`
 2. Make your changes and write tests
-3. Run tests: `npm test`
+3. Run tests: `npm test` (target 80%+ backend, 70%+ frontend coverage)
 4. Commit with descriptive messages: `git commit -m "feat: description"`
 5. Push to your branch and create a pull request
+
+**Development setup**: `docker-compose up -d` or follow [Manual Installation](#manual-installation)
 
 ## License
 

@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # T174: Backend service
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      LOG_LEVEL: debug
+      PORT: 3000
+      DOCKER_HOST: /var/run/docker.sock
+      FRONTEND_URL: http://localhost:5173
+    volumes:
+      # T174: Mount Docker socket to access host Docker daemon
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - frontend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # T174: Frontend service
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_URL: http://localhost:3000
+        VITE_WS_URL: ws://localhost:3000
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:3000
+      VITE_WS_URL: ws://localhost:3000
+    depends_on:
+      - backend
+
+volumes:
+  # Optional: Persistent volume for logs if needed
+  logs:
+    driver: local
+
+networks:
+  default:
+    name: docker-dashboard-network

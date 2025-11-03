@@ -214,7 +214,7 @@ Each user story phase includes:
 - [x] T089 [P] Extend frontend/src/components/ContainerListTable.vue: add CPU%, Memory% columns, update on metrics_update
 - [x] T090 [P] Create frontend/src/components/MetricsCell.vue displaying percentage with color coding: green (<50%), yellow (50-80%), red (>80%); handle CPU >100% (multi-core) and memory 0-100%; use responsive font scaling to prevent truncation (see plan.md High CPU/Memory Value Handling)
 - [x] T091 [P] Create frontend/src/components/ContainerDetailView.vue displaying full metrics: CPU%, memory bytes/%, disk I/O rates, network I/O rates in detail panel
-- [ ] T092 Implement metric update animation: smooth number transitions when metrics change (use CSS transitions or Vue transitions)
+- [x] T092 Implement metric update animation: smooth number transitions when metrics change (use CSS transitions or Vue transitions)
 - [x] T093 Handle metrics unavailable state: show "N/A" with indicator when metrics.status === "unavailable"
 
 ### Component Tests for User Story 2
@@ -354,27 +354,27 @@ Each user story phase includes:
 
 ### Error Handling & Recovery
 
-- [ ] T147 Implement backend health check endpoint: GET /health returns {status: "ok", docker: "ok|error"} for monitoring
-- [ ] T148 [P] Implement graceful degradation: when metrics unavailable, return metrics_unavailable message with 5s retry hint, don't crash dashboard
-- [ ] T149 [P] Implement WebSocket reconnection with exponential backoff: 1s, 2s, 4s, 8s, max 30s
-- [ ] T150 Implement frontend error boundary component: catches component rendering errors, displays error message, allows user to retry
-- [ ] T151 [P] Implement metrics stale indicator: show "stale" flag on metrics older than 30 seconds without update
+- [x] T147 Implement backend health check endpoint: GET /health returns {status: "ok", docker: "ok|error"} for monitoring
+- [x] T148 [P] Implement graceful degradation: when metrics unavailable, return metrics_unavailable message with 5s retry hint, don't crash dashboard
+- [x] T149 [P] Implement WebSocket reconnection with exponential backoff: 1s, 2s, 4s, 8s, max 30s
+- [x] T150 Implement frontend error boundary component: catches component rendering errors, displays error message, allows user to retry
+- [x] T151 [P] Implement metrics stale indicator: show "stale" flag on metrics older than 30 seconds without update
 
 ### Performance Optimization
 
 - [ ] T152 Implement container list pagination: show 50 containers per page with pagination controls for large deployments
-- [ ] T153 [P] Implement metric update throttling: send metrics_update max once per second to prevent frontend overwhelm
+- [x] T153 [P] Implement metric update throttling: send metrics_update max once per second to prevent frontend overwhelm
 - [ ] T154 [P] Optimize WebSocket message size: compress metrics updates, send only changed fields (delta encoding)
 - [ ] T155 Implement lazy loading: fetch container details on-demand (container detail page), not in list view
 - [ ] T156 [P] Implement frontend component lazy loading: route chunks only loaded when accessed
-- [ ] T157 Cache container list: keep 30s TTL in frontend for container list to reduce REST calls
+- [x] T157 Cache container list: keep 30s TTL in frontend for container list to reduce REST calls
 
 ### Documentation & Testing
 
-- [ ] T158 Create backend/README.md: project structure, setup instructions, API endpoints, WebSocket protocol, running tests
-- [ ] T159 [P] Create frontend/README.md: project structure, component guide, composables, running tests, Vite dev server
-- [ ] T160 [P] Create CONTRIBUTING.md: development workflow, testing strategy, commit conventions
-- [ ] T161 Create API_CONTRACTS.md: document all REST and WebSocket endpoints with examples
+- [x] T158 Create backend/README.md: project structure, setup instructions, API endpoints, WebSocket protocol, running tests
+- [x] T159 [P] Create frontend/README.md: project structure, component guide, composables, running tests, Vite dev server
+- [x] T160 [P] Create CONTRIBUTING.md: development workflow, testing strategy, commit conventions
+- [x] T161 Create API_CONTRACTS.md: document all REST and WebSocket endpoints with examples
 - [ ] T162 [P] Write unit test suite for all services: >=80% code coverage for docker.service, registry.service
 - [ ] T163 Write integration test suite: verify end-to-end flows (list containers, view detail, update metrics)
 - [ ] T164 [P] Write component test suite: >=70% coverage for all Vue components
@@ -383,19 +383,19 @@ Each user story phase includes:
 
 ### Production Readiness
 
-- [ ] T167 Configure Docker healthcheck: container startup waits for Docker API connectivity check to pass
-- [ ] T168 [P] Implement structured logging: all logs include timestamp, level, service, operation, context
+- [x] T167 Configure Docker healthcheck: container startup waits for Docker API connectivity check to pass
+- [x] T168 [P] Implement structured logging: all logs include timestamp, level, service, operation, context
 - [ ] T169 [P] Configure log rotation: logs > 10MB rotated, keep 7 days history
-- [ ] T170 Implement CORS security: validate FRONTEND_URL env var, reject cross-origin without explicit allowlist
+- [x] T170 Implement CORS security: validate FRONTEND_URL env var, reject cross-origin without explicit allowlist
 - [ ] T171 [P] Add rate limiting: API endpoints rate limited to 100 req/min per IP (prevent abuse)
 - [ ] T172 [P] Add request timeout: set 30s timeout on Docker API calls, handle gracefully with user message
-- [ ] T173 Configure environment variables: all secrets and config via .env, never hardcoded
-- [ ] T174 [P] Create docker-compose.yml: runs backend + frontend + Docker socket volume for local testing
-- [ ] T175 [P] Create Dockerfile: backend production image with multi-stage build, minimal base image
+- [x] T173 Configure environment variables: all secrets and config via .env, never hardcoded
+- [x] T174 [P] Create docker-compose.yml: runs backend + frontend + Docker socket volume for local testing
+- [x] T175 [P] Create Dockerfile: backend production image with multi-stage build, minimal base image
 
 ### Deployment & Monitoring
 
-- [ ] T176 Create deployment guide: instructions for running in Docker, setting DOCKER_HOST, volume mounts
+- [x] T176 Create deployment guide: instructions for running in Docker, setting DOCKER_HOST, volume mounts
 - [ ] T177 [P] Implement metrics export: optional Prometheus-style metrics endpoint for monitoring (optional, low priority)
 - [ ] T178 [P] Configure CI/CD: GitHub Actions runs tests, lints, builds on each PR
 - [ ] T179 Create dashboard screenshot/demo: README includes GIF or video of dashboard in action

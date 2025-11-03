@@ -30,6 +30,9 @@ export class WebSocketManager {
     private metricsInterval?: NodeJS.Timeout;
     private lastContainerStates: Map<string, string> = new Map();
     private dockerService = getDockerService();
+    // T153: Track last metrics update time for throttling (max 1 per second per container)
+    private lastMetricsUpdateTime: Map<string, number> = new Map();
+    private readonly METRICS_THROTTLE_MS = 1000; // 1 second
 
     /**
      * Register a new WebSocket client
@@ -164,8 +167,20 @@ export class WebSocketManager {
 
     /**
      * Broadcast metrics update for a container
+     * T153: Throttled to max 1 per second per container
      */
     broadcastMetricsUpdate(containerId: string, metrics: any): void {
+        // T153: Check throttle - only send if last update was > 1s ago
+        const now = Date.now();
+        const lastUpdateTime = this.lastMetricsUpdateTime.get(containerId) || 0;
+
+        if (now - lastUpdateTime < this.METRICS_THROTTLE_MS) {
+            // Skip this update, within throttle window
+            return;
+        }
+
+        this.lastMetricsUpdateTime.set(containerId, now);
+
         const message: MetricsUpdateMessage = {
             type: "metrics_update",
             data: {
