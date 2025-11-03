@@ -337,9 +337,13 @@ export class DockerService {
             fullId: dockerContainer.Id || "",
             name: name.replace(/^\//, ""),
             status,
+            // BUG FIX: Use Config.Image (human-readable name) first, not Image (sha256)
+            // Docker listContainers() returns Image as sha256 hash
+            // Docker inspect() returns Config.Image as the actual image reference (e.g., lscr.io/linuxserver/sonarr:latest)
+            // We need the human-readable name for display and registry lookups
             image:
-                dockerContainer.Image ||
                 dockerContainer.Config?.Image ||
+                dockerContainer.Image ||
                 "unknown",
             created: dockerContainer.Created || new Date().toISOString(),
             started: dockerContainer.State?.StartedAt || undefined,
