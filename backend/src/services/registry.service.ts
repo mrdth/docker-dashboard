@@ -40,8 +40,15 @@ export class RegistryService {
         }
 
         try {
-            const [name, tag] = this.parseImageName(imageName);
+            let [name, tag] = this.parseImageName(imageName);
             const tagToCheck = currentTag || tag || "latest";
+
+            // lscr.io/ghcr.io containers are mirrored from Docker Hub
+            // so we can strip the prefix to get the original Docker Hub image name
+            name =
+                name.startsWith("lscr.io/") || name.startsWith("ghcr.io/")
+                    ? name.substring(8)
+                    : name;
 
             // Detect if this is a private registry
             if (this.isPrivateRegistry(name)) {
@@ -75,7 +82,8 @@ export class RegistryService {
                 id: "",
                 created: new Date().toISOString(),
                 registryStatus: "checked",
-                updateAvailable: latestVersion !== null && latestVersion !== tagToCheck,
+                updateAvailable:
+                    latestVersion !== null && latestVersion !== tagToCheck,
                 latestVersion: latestVersion || undefined,
                 lastChecked: new Date().toISOString(),
             };
@@ -126,7 +134,10 @@ export class RegistryService {
             const url = `https://hub.docker.com/v2/repositories/${normalizedName}/tags/${currentTag}`;
 
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), this.REQUEST_TIMEOUT);
+            const timeoutId = setTimeout(
+                () => controller.abort(),
+                this.REQUEST_TIMEOUT,
+            );
 
             try {
                 const response = await fetch(url, {
@@ -171,11 +182,11 @@ export class RegistryService {
     private isPrivateRegistry(imageName: string): boolean {
         // Check for known private registry patterns
         const privateRegistryPatterns = [
-            /^gcr\.io\//,           // Google Container Registry
-            /^quay\.io\//,          // Quay.io
-            /^registry\.gitlab\.com\//,  // GitLab Registry
-            /^docker\.io\//,        // Docker private (but still Docker Hub)
-            /^.*\.[^/]+\/[^/]+$/,   // General pattern: has dot in first segment (private registry)
+            /^gcr\.io\//, // Google Container Registry
+            /^quay\.io\//, // Quay.io
+            /^registry\.gitlab\.com\//, // GitLab Registry
+            /^docker\.io\//, // Docker private (but still Docker Hub)
+            /^.*\.[^/]+\/[^/]+$/, // General pattern: has dot in first segment (private registry)
         ];
 
         // If image has a registry domain (contains / and first part has .), it's private
@@ -217,10 +228,7 @@ export class RegistryService {
             return [imageName, "latest"];
         }
 
-        return [
-            imageName.substring(0, lastColonIndex),
-            afterColon,
-        ];
+        return [imageName.substring(0, lastColonIndex), afterColon];
     }
 
     /**
