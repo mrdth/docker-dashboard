@@ -31,11 +31,9 @@ RUN npm ci --only=production
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
-
-USER nodejs
+# Note: Running as root to access Docker socket.
+# This is necessary for the backend to connect to the Docker daemon.
+# In production, use Docker-in-Docker or configure proper socket permissions.
 
 # Health check
 HEALTHCHECK --interval=10s --timeout=5s --retries=3 --start-period=10s \
