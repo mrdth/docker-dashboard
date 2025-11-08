@@ -98,34 +98,14 @@ export function useContainers(): UseContainersState & {
             }>("/api/containers");
 
             if (response && response.containers) {
-                // For each container, fetch its detail to get metrics
-                const containersWithMetrics = await Promise.all(
-                    response.containers.map(async (container) => {
-                        try {
-                            const detailResponse = await get<{
-                                container: Container;
-                            }>(`/api/containers/${container.id}`);
-
-                            if (detailResponse?.container) {
-                                return detailResponse.container;
-                            }
-                            return container;
-                        } catch (err) {
-                            // If detail fetch fails, return container without metrics
-                            console.warn(
-                                `Failed to fetch metrics for container ${container.id}`,
-                                err,
-                            );
-                            return container;
-                        }
-                    }),
-                );
-
-                containers.value = containersWithMetrics;
+                // Return containers immediately without waiting for metrics
+                // Metrics will arrive via WebSocket updates (metrics_update)
+                // ImageInfo will arrive via WebSocket updates (imageinfo_update)
+                containers.value = response.containers;
                 lastUpdated.value = new Date();
 
                 // T157: Update cache
-                cachedContainers = containersWithMetrics;
+                cachedContainers = response.containers;
                 lastCacheTime = Date.now();
             }
         } catch (err) {
