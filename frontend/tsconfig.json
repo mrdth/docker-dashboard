@@ -31,7 +31,7 @@
         "paths": {
             "@/*": ["./src/*"]
         },
-        "types": ["vite/client"],
+        "types": ["vite/client", "node"],
         "typeRoots": ["./node_modules/@types"]
     },
     "include": ["src", "vite-env.d.ts"],

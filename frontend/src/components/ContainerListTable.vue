@@ -118,7 +118,7 @@ interface Props {
     containers: Container[];
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 /**
  * Format timestamp to readable date

@@ -62,7 +62,6 @@ import LoadingSpinner from "../components/LoadingSpinner.vue";
  * Displays container list with real-time updates and filtering
  */
 const {
-    containers,
     filteredContainers,
     filters,
     loading,
