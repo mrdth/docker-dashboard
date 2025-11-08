@@ -217,6 +217,21 @@ export function useContainers(): UseContainersState & {
     }
 
     /**
+     * Handle WebSocket imageinfo_update message
+     * Updates container's imageInfo as it becomes available asynchronously
+     */
+    function handleImageInfoUpdate(message: any): void {
+        const { containerId, imageInfo } = message.data;
+
+        const containerIndex = containers.value.findIndex(
+            (c) => c.id === containerId,
+        );
+        if (containerIndex >= 0) {
+            containers.value[containerIndex].imageInfo = imageInfo;
+        }
+    }
+
+    /**
      * Handle WebSocket messages
      */
     function handleWebSocketMessage(message: WebSocketMessage): void {
@@ -229,6 +244,9 @@ export function useContainers(): UseContainersState & {
                 break;
             case "metrics_update":
                 handleMetricsUpdate(message);
+                break;
+            case "imageinfo_update":
+                handleImageInfoUpdate(message);
                 break;
             case "error":
                 error.value = message.data?.reason || "WebSocket error";

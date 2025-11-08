@@ -83,6 +83,14 @@ export interface WebSocketMessage {
     error?: string;
 }
 
+export interface ImageInfoUpdateMessage extends WebSocketMessage {
+    type: "imageinfo_update";
+    data?: {
+        containerId: string;
+        imageInfo: ImageInfo;
+    };
+}
+
 export interface ErrorMessage extends WebSocketMessage {
     type: "error";
     data?: {

@@ -86,32 +86,54 @@ router.get(
                 });
             }
 
-            // Populate imageInfo for each container (from cache, won't block)
-            const registryService = getRegistryService();
-            for (const container of containers) {
-                try {
-                    container.imageInfo = await registryService.checkForUpdates(
-                        container.image,
-                    );
-                } catch (error) {
-                    // If imageInfo fails, just continue without it
-                    logError(
-                        "Failed to get imageInfo for container",
-                        error as Error,
-                        {
-                            service: "api",
-                            operation: "listContainers",
-                            containerId: container.id,
-                            image: container.image,
-                        },
-                    );
-                }
-            }
-
+            // Return container list immediately without waiting for imageInfo
+            // imageInfo will be fetched asynchronously and updates will be sent via WebSocket
             res.json({
                 containers,
                 error: null,
                 timestamp: new Date().toISOString(),
+            });
+
+            // Fetch imageInfo asynchronously in the background after returning response
+            // This prevents blocking the initial container list render
+            setImmediate(async () => {
+                const registryService = getRegistryService();
+                for (const container of containers) {
+                    try {
+                        const imageInfo = await registryService.checkForUpdates(
+                            container.image,
+                            undefined,
+                            container.created,
+                        );
+
+                        // Broadcast imageInfo update via WebSocket to all connected clients
+                        // This allows the frontend to update the container's imageInfo as it arrives
+                        if (imageInfo) {
+                            const { getWebSocketManager } = await import(
+                                "../../websocket/manager"
+                            );
+                            const wsManager = getWebSocketManager();
+                            wsManager.broadcast({
+                                type: "imageinfo_update",
+                                containerId: container.id,
+                                imageInfo,
+                                timestamp: new Date().toISOString(),
+                            });
+                        }
+                    } catch (error) {
+                        // Log error but don't fail - imageInfo is optional
+                        logError(
+                            "Failed to fetch imageInfo for container",
+                            error as Error,
+                            {
+                                service: "api",
+                                operation: "listContainers",
+                                containerId: container.id,
+                                image: container.image,
+                            },
+                        );
+                    }
+                }
             });
         } catch (error) {
             if (error instanceof DockerDaemonError) {
