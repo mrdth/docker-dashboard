@@ -114,9 +114,11 @@ router.get(
                             );
                             const wsManager = getWebSocketManager();
                             wsManager.broadcast({
-                                type: "imageinfo_update",
-                                containerId: container.id,
-                                imageInfo,
+                                type: "imageinfo_update" as const,
+                                data: {
+                                    containerId: container.id,
+                                    imageInfo,
+                                },
                                 timestamp: new Date().toISOString(),
                             });
                         }
