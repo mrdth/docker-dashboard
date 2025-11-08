@@ -33,16 +33,24 @@ export async function handleWebSocketMessage(
                 handleReady(clientId);
                 break;
 
+            case "ping":
+                // Respond to ping with pong
+                wsManager.sendToClient(clientId, {
+                    type: "pong",
+                    timestamp: new Date().toISOString(),
+                });
+                break;
+
+            case "pong":
+                wsManager.handlePong(clientId);
+                break;
+
             case "get_containers":
                 await handleGetContainers(clientId);
                 break;
 
             case "get_container_detail":
                 await handleGetContainerDetail(clientId, message.data);
-                break;
-
-            case "pong":
-                wsManager.handlePong(clientId);
                 break;
 
             case "close":

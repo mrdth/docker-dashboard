@@ -143,20 +143,25 @@ export function useContainers(): UseContainersState & {
             return;
         }
 
+        console.log("container_list received", {
+            count: updatedContainers.length,
+            firstContainerImageInfo: updatedContainers[0]?.imageInfo,
+        });
+
         // Create a map of updated containers by ID for quick lookup
         const updatedMap = new Map(
             updatedContainers.map((c: Container) => [c.id, c]),
         );
 
-        // Merge updated container data while preserving metrics and imageInfo
+        // Merge updated container data, preferring updated imageInfo over existing
         const mergedContainers = containers.value.map((existing) => {
             const updated = updatedMap.get(existing.id);
             if (updated) {
-                // Merge: keep existing metrics and imageInfo, update other fields
+                // Merge: use updated imageInfo if available, keep existing metrics
                 return {
                     ...updated,
                     metrics: existing.metrics, // Preserve existing metrics
-                    imageInfo: existing.imageInfo, // Preserve existing imageInfo
+                    imageInfo: updated.imageInfo || existing.imageInfo, // Use updated imageInfo if available
                 };
             }
             return existing;
@@ -203,11 +208,17 @@ export function useContainers(): UseContainersState & {
     function handleImageInfoUpdate(message: any): void {
         const { containerId, imageInfo } = message.data;
 
+        console.log("imageinfo_update received", { containerId, imageInfo });
+
         const containerIndex = containers.value.findIndex(
             (c) => c.id === containerId,
         );
         if (containerIndex >= 0) {
             containers.value[containerIndex].imageInfo = imageInfo;
+            console.log("Updated container imageInfo", {
+                containerId,
+                updateAvailable: imageInfo?.updateAvailable,
+            });
         }
     }
 

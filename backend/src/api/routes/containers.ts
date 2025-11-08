@@ -106,6 +106,14 @@ router.get(
                             container.created,
                         );
 
+                        log("debug", "Fetched imageInfo for container", {
+                            service: "api",
+                            operation: "listContainers",
+                            containerId: container.id,
+                            image: container.image,
+                            updateAvailable: imageInfo?.updateAvailable,
+                        });
+
                         // Broadcast imageInfo update via WebSocket to all connected clients
                         // This allows the frontend to update the container's imageInfo as it arrives
                         if (imageInfo) {
@@ -121,6 +129,17 @@ router.get(
                                 },
                                 timestamp: new Date().toISOString(),
                             });
+
+                            log(
+                                "debug",
+                                "Broadcast imageinfo_update via WebSocket",
+                                {
+                                    service: "api",
+                                    operation: "listContainers",
+                                    containerId: container.id,
+                                    updateAvailable: imageInfo.updateAvailable,
+                                },
+                            );
                         }
                     } catch (error) {
                         // Log error but don't fail - imageInfo is optional
