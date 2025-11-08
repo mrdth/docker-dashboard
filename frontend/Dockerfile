@@ -15,6 +15,7 @@ COPY frontend/src ./src
 COPY frontend/public ./public
 COPY frontend/index.html .
 COPY frontend/vite.config.ts .
+COPY frontend/vite-env.d.ts .
 COPY frontend/tsconfig.json .
 COPY frontend/tailwind.config.ts .
 COPY frontend/postcss.config.cjs .
