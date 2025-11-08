@@ -48,7 +48,7 @@ HEALTHCHECK --interval=10s --timeout=5s --retries=3 --start-period=10s \
 EXPOSE 3000
 
 # Use dumb-init to properly handle signals
-ENTRYPOINT ["/sbin/dumb-init", "--"]
+ENTRYPOINT ["/usr/sbin/dumb-init", "--"]
 
 # Start application
 CMD ["node", "dist/main.js"]
