@@ -5,6 +5,7 @@
 
 import type { WebSocket } from "ws";
 import { getDockerService } from "../services/docker.service";
+import { getRegistryService } from "../services/registry.service";
 import { getLogger } from "../logger/index";
 import {
     WebSocketMessage,
@@ -223,6 +224,7 @@ export class WebSocketManager {
         this.metricsInterval = setInterval(async () => {
             try {
                 const containers = await this.dockerService.listContainers();
+                const registryService = getRegistryService();
 
                 // Check for status changes
                 containers.forEach((container) => {
@@ -243,8 +245,42 @@ export class WebSocketManager {
                     );
                 });
 
-                // Broadcast container list
-                this.broadcastContainerList(containers);
+                // Fetch imageInfo for all containers in parallel (non-blocking)
+                // This populates the imageInfo on containers before broadcasting
+                const containersWithImageInfo = await Promise.all(
+                    containers.map(async (container) => {
+                        try {
+                            const imageInfo =
+                                await registryService.checkForUpdates(
+                                    container.image,
+                                    undefined,
+                                    container.created,
+                                );
+                            return {
+                                ...container,
+                                imageInfo,
+                            };
+                        } catch (error) {
+                            // If imageInfo fetch fails, just return container without it
+                            logger.debug(
+                                "Failed to fetch imageInfo in WebSocket collection",
+                                {
+                                    service: "websocket",
+                                    operation: "metricsCollection",
+                                    containerId: container.id,
+                                    error:
+                                        error instanceof Error
+                                            ? error.message
+                                            : "Unknown error",
+                                },
+                            );
+                            return container;
+                        }
+                    }),
+                );
+
+                // Broadcast container list with imageInfo included
+                this.broadcastContainerList(containersWithImageInfo);
 
                 // Fetch and broadcast metrics for each running container
                 for (const container of containers) {
