@@ -25,15 +25,28 @@ cd docker-dashboard
 
 2. Configure environment variables (optional):
 
-Edit `docker-compose.yml` to set environment variables:
+Create a `.env` file in the project root (based on `.env.example`):
 
-```yaml
-environment:
-  NODE_ENV: production
-  LOG_LEVEL: info
-  DOCKER_HOST: /var/run/docker.sock
-  FRONTEND_URL: https://your-domain.com
+```bash
+cp .env.example .env
 ```
+
+Edit `.env` to customize for your deployment:
+
+```env
+# Backend configuration
+BACKEND_PORT=3033
+NODE_ENV=production
+LOG_LEVEL=info
+FRONTEND_URL=https://your-domain.com
+
+# Frontend configuration
+FRONTEND_PORT=8173
+VITE_API_URL=https://api.your-domain.com:3033
+VITE_WS_URL=wss://api.your-domain.com:3033
+```
+
+**Important**: Do NOT edit `docker-compose.yml` for deployment-specific config. Use `.env` instead to avoid merge conflicts with upstream changes.
 
 3. Start services:
 
@@ -41,9 +54,13 @@ environment:
 docker-compose up -d
 ```
 
-Services start on:
-- Frontend: http://localhost:5173
-- Backend: http://localhost:3000
+Services start on (default):
+- Frontend: http://localhost:8173
+- Backend: http://localhost:3033
+
+Or on your network (with `.env` config):
+- Frontend: http://192.168.1.86:8173
+- Backend: http://192.168.1.86:3033
 
 4. View logs:
 
@@ -58,7 +75,61 @@ docker-compose logs -f frontend
 docker-compose down
 ```
 
-### Method 2: Docker (Production)
+#### Environment Variables
+
+All environment variables can be overridden via `.env` file:
+
+**Backend**:
+- `BACKEND_PORT` - Host port for backend (default: 3033)
+- `NODE_ENV` - "production" or "development" (default: development)
+- `LOG_LEVEL` - "debug", "info", "warn", or "error" (default: debug)
+- `FRONTEND_URL` - Frontend origin for CORS (default: http://localhost:8173)
+
+**Frontend**:
+- `FRONTEND_PORT` - Host port for frontend (default: 8173)
+- `VITE_API_URL` - Backend API URL (default: http://localhost:3033)
+- `VITE_WS_URL` - WebSocket URL (default: ws://localhost:3033)
+
+### Method 2: Docker Compose with Custom .env (Recommended for Deployment)
+
+For deployments on different networks or ports without modifying `docker-compose.yml`:
+
+#### Setup
+
+1. Create `.env` file from template:
+
+```bash
+cp .env.example .env
+```
+
+2. Edit `.env` with your deployment details:
+
+```env
+# For deployment on 192.168.1.86:3033 and 192.168.1.86:8173
+BACKEND_PORT=3033
+FRONTEND_PORT=8173
+VITE_API_URL=http://192.168.1.86:3033
+VITE_WS_URL=ws://192.168.1.86:3033
+FRONTEND_URL=http://192.168.1.86:8173
+NODE_ENV=production
+LOG_LEVEL=info
+```
+
+3. Start services:
+
+```bash
+docker compose up -d
+```
+
+Docker Compose automatically loads `.env` and applies all variables. This prevents merge conflicts when pulling upstream changes.
+
+4. Verify services:
+
+```bash
+curl http://192.168.1.86:3033/health
+```
+
+### Method 3: Docker (Production)
 
 Run individual containers with custom configuration.
 
@@ -70,8 +141,8 @@ docker build -f backend/Dockerfile -t dashboard-backend:latest .
 
 # Build frontend image
 docker build -f frontend/Dockerfile \
-  --build-arg VITE_API_URL=http://localhost:3000 \
-  --build-arg VITE_WS_URL=ws://localhost:3000 \
+  --build-arg VITE_API_URL=http://192.168.1.86:3033 \
+  --build-arg VITE_WS_URL=ws://192.168.1.86:3033 \
   -t dashboard-frontend:latest .
 ```
 
@@ -80,12 +151,12 @@ docker build -f frontend/Dockerfile \
 ```bash
 docker run -d \
   --name dashboard-backend \
-  -p 3000:3000 \
+  -p 3033:3000 \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -e NODE_ENV=production \
   -e LOG_LEVEL=info \
   -e DOCKER_HOST=/var/run/docker.sock \
-  -e FRONTEND_URL=https://your-domain.com \
+  -e FRONTEND_URL=http://192.168.1.86:8173 \
   --restart unless-stopped \
   dashboard-backend:latest
 ```
@@ -95,9 +166,9 @@ docker run -d \
 ```bash
 docker run -d \
   --name dashboard-frontend \
-  -p 80:80 \
-  -e VITE_API_URL=https://api.your-domain.com \
-  -e VITE_WS_URL=wss://api.your-domain.com \
+  -p 8173:80 \
+  -e VITE_API_URL=http://192.168.1.86:3033 \
+  -e VITE_WS_URL=ws://192.168.1.86:3033 \
   --restart unless-stopped \
   dashboard-frontend:latest
 ```
@@ -112,10 +183,10 @@ docker run -d \
 - `FRONTEND_URL` - Frontend origin for CORS (required)
 
 **Frontend**:
-- `VITE_API_URL` - Backend API URL (e.g., http://localhost:3000)
-- `VITE_WS_URL` - WebSocket URL (e.g., ws://localhost:3000)
+- `VITE_API_URL` - Backend API URL (e.g., http://192.168.1.86:3033)
+- `VITE_WS_URL` - WebSocket URL (e.g., ws://192.168.1.86:3033)
 
-### Method 3: Direct Installation (Development)
+### Method 4: Direct Installation (Development)
 
 Run without Docker for development.
 
@@ -158,6 +229,52 @@ npm run dev
 npm run build
 npm run preview
 ```
+
+## Environment Configuration (.env)
+
+### Using .env Files for Deployments
+
+The recommended approach is to use `.env` files to configure deployments without modifying `docker-compose.yml`. This prevents merge conflicts when syncing upstream changes.
+
+#### .env File Format
+
+```env
+# Backend ports and environment
+BACKEND_PORT=3033
+NODE_ENV=production
+LOG_LEVEL=info
+FRONTEND_URL=http://192.168.1.86:8173
+
+# Frontend ports and API configuration
+FRONTEND_PORT=8173
+VITE_API_URL=http://192.168.1.86:3033
+VITE_WS_URL=ws://192.168.1.86:3033
+```
+
+#### Setup Steps
+
+1. Copy the example file:
+```bash
+cp .env.example .env
+```
+
+2. Edit `.env` with your deployment-specific values
+
+3. Run Docker Compose (it automatically loads `.env`):
+```bash
+docker compose up -d
+```
+
+#### Why Use .env Instead of Editing docker-compose.yml
+
+- **Avoid Merge Conflicts**: `.env` is in `.gitignore`, local changes won't conflict with upstream
+- **Consistent Configuration**: Same file structure across all deployments
+- **Security**: Environment variables stay out of version control
+- **Easy Updates**: Pull upstream changes without losing your configuration
+
+#### Available Variables
+
+See `.env.example` for all available configuration options and defaults.
 
 ## Important: Docker Socket Access
 
