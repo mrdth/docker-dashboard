@@ -105,6 +105,8 @@ export class DockerService {
             const registryService = getRegistryService();
             normalized.imageInfo = await registryService.checkForUpdates(
                 normalized.image,
+                undefined,
+                normalized.created,
             );
 
             return normalized;

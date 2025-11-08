@@ -11,6 +11,12 @@ interface CacheEntry {
     imageInfo: ImageInfo;
 }
 
+interface DockerHubTagResponse {
+    name: string;
+    last_updated: string;
+    [key: string]: any;
+}
+
 export class RegistryService {
     private cache: Map<string, CacheEntry> = new Map();
     private readonly CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
@@ -20,11 +26,13 @@ export class RegistryService {
      * Check for image updates
      * @param imageName Full image name (e.g., "nginx:latest" or "gcr.io/myorg/myimage:1.0")
      * @param currentTag Current tag being used
+     * @param containerCreated ISO 8601 timestamp of when the container was created
      * @returns ImageInfo with update availability status
      */
     async checkForUpdates(
         imageName: string,
         currentTag?: string,
+        containerCreated?: string,
     ): Promise<ImageInfo> {
         const cacheKey = imageName;
 
@@ -71,10 +79,19 @@ export class RegistryService {
             }
 
             // Try to fetch latest version from Docker Hub
-            const latestVersion = await this.fetchLatestVersionFromDockerHub(
+            const tagInfo = await this.fetchLatestVersionFromDockerHub(
                 name,
                 tagToCheck,
             );
+
+            // Determine if update is available by comparing timestamps
+            let updateAvailable = false;
+            if (tagInfo && containerCreated) {
+                // Compare container creation date with tag's last_updated
+                const containerDate = new Date(containerCreated).getTime();
+                const tagDate = new Date(tagInfo.last_updated).getTime();
+                updateAvailable = tagDate > containerDate;
+            }
 
             const imageInfo: ImageInfo = {
                 name,
@@ -82,10 +99,10 @@ export class RegistryService {
                 id: "",
                 created: new Date().toISOString(),
                 registryStatus: "checked",
-                updateAvailable:
-                    latestVersion !== null && latestVersion !== tagToCheck,
-                latestVersion: latestVersion || undefined,
+                updateAvailable,
+                latestVersion: tagInfo?.name || undefined,
                 lastChecked: new Date().toISOString(),
+                lastUpdated: tagInfo?.last_updated || undefined,
             };
 
             this.cache.set(cacheKey, {
@@ -116,15 +133,15 @@ export class RegistryService {
     }
 
     /**
-     * Fetch latest version from Docker Hub
+     * Fetch tag info from Docker Hub
      * @param imageName Image name without tag (e.g., "library/nginx" or "nginx")
      * @param currentTag Current tag
-     * @returns Latest tag version or null if unavailable
+     * @returns Tag info with name and last_updated timestamp, or null if unavailable
      */
     private async fetchLatestVersionFromDockerHub(
         imageName: string,
         currentTag: string,
-    ): Promise<string | null> {
+    ): Promise<DockerHubTagResponse | null> {
         try {
             // Normalize image name for Docker Hub
             const normalizedName = imageName.includes("/")
@@ -150,13 +167,14 @@ export class RegistryService {
                     return null;
                 }
 
-                const data = (await response.json()) as any;
+                const data = (await response.json()) as DockerHubTagResponse;
 
-                // Try to find the latest tag
-                // For simplicity, we'll check if there's a newer version
-                // In a real implementation, you might compare version numbers
-                if (data.name) {
-                    return data.name;
+                // Return tag info with both name and last_updated timestamp
+                if (data.name && data.last_updated) {
+                    return {
+                        name: data.name,
+                        last_updated: data.last_updated,
+                    };
                 }
 
                 return null;

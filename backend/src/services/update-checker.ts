@@ -94,7 +94,17 @@ export class UpdateChecker {
             let checkCount = 0;
             for (const imageName of uniqueImages) {
                 try {
-                    await registryService.checkForUpdates(imageName);
+                    // Find a container using this image to get its created date
+                    const containerWithImage = containers.find(
+                        (c) => c.image === imageName,
+                    );
+                    const containerCreated = containerWithImage?.created;
+
+                    await registryService.checkForUpdates(
+                        imageName,
+                        undefined,
+                        containerCreated,
+                    );
                     checkCount++;
 
                     // Log only if this is a new image being checked
@@ -144,9 +154,7 @@ export class UpdateChecker {
         return {
             isRunning: this.isRunning,
             checkedImages: this.checkedImages.size,
-            nextCheckIn: this.checkInterval
-                ? this.CHECK_INTERVAL_MS
-                : null,
+            nextCheckIn: this.checkInterval ? this.CHECK_INTERVAL_MS : null,
         };
     }
 }
