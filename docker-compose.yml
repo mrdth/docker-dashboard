@@ -21,6 +21,7 @@ services:
             timeout: 5s
             retries: 3
             start_period: 10s
+        restart: unless-stopped
 
     # T174: Frontend service
     frontend:
@@ -37,6 +38,7 @@ services:
             VITE_WS_URL: ${VITE_WS_URL:-ws://localhost:3033}
         depends_on:
             - backend
+        restart: unless-stopped
 
 volumes:
     # Optional: Persistent volume for logs if needed

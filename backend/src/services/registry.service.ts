@@ -90,7 +90,7 @@ export class RegistryService {
                 // Compare container creation date with tag's last_updated
                 const containerDate = new Date(containerCreated).getTime();
                 const tagDate = new Date(tagInfo.last_updated).getTime();
-                updateAvailable = tagDate > containerDate;
+                updateAvailable = tagDate / 1000 > containerDate;
             }
 
             const imageInfo: ImageInfo = {
