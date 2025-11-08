@@ -7,7 +7,7 @@
         >
             <div
                 v-if="imageInfo.updateAvailable"
-                class="inline-flex items-center gap-1 px-2 py-1 bg-blue-900 text-blue-200 rounded text-xs font-medium hover:bg-blue-800 transition-colors cursor-help"
+                class="inline-flex items-center gap-1 px-2 py-1 bg-red-500 text-red-200 rounded text-xs font-medium hover:bg-red-800 transition-colors cursor-help"
             >
                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                     <path
@@ -16,13 +16,13 @@
                         clip-rule="evenodd"
                     />
                 </svg>
-                Update available
+
             </div>
 
             <!-- Up to date indicator -->
             <div
                 v-else
-                class="inline-flex items-center gap-1 px-2 py-1 bg-green-900 text-green-200 rounded text-xs font-medium"
+                class="inline-flex items-center gap-1 px-2 py-1 bg-green-500 text-green-200 rounded text-xs font-medium"
             >
                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                     <path
@@ -31,40 +31,19 @@
                         clip-rule="evenodd"
                     />
                 </svg>
-                Up to date
+
             </div>
 
             <!-- Tooltip showing latest version -->
             <div
-                v-if="imageInfo.updateAvailable && imageInfo.latestVersion"
-                class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-gray-100 text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
+                class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-gray-100 text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50"
             >
-                Latest: {{ imageInfo.latestVersion }}
+                <span v-if="imageInfo.updateAvailable">Update<br/>Available</span>
+                <span v-else>Up to date</span>
                 <div
                     class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800"
                 />
             </div>
-        </div>
-
-        <!-- Checking state -->
-        <div
-            v-else-if="imageInfo.registryStatus === 'checking'"
-            class="inline-flex items-center gap-1 px-2 py-1 bg-gray-700 text-gray-300 rounded text-xs font-medium"
-        >
-            <svg
-                class="w-3 h-3 animate-spin"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-            </svg>
-            Checking...
         </div>
 
         <!-- Unable to check (private registry) -->
@@ -82,7 +61,7 @@
                         clip-rule="evenodd"
                     />
                 </svg>
-                Unable to check
+
             </div>
 
             <!-- Tooltip for private registry -->

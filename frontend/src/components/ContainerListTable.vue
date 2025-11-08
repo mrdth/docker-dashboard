@@ -28,12 +28,6 @@
                     >
                         MEM %
                     </th>
-                    <!-- T142: Add update indicator column -->
-                    <th
-                        class="px-6 py-3 text-center font-semibold text-gray-900"
-                    >
-                        Updates
-                    </th>
                     <th
                         class="px-6 py-3 text-center font-semibold text-gray-900"
                     >
@@ -48,13 +42,16 @@
                     class="border-b border-gray-200 hover:bg-gray-50 transition-colors"
                 >
                     <td class="px-6 py-4">
-                        <div class="font-medium text-gray-900">
+                        <div class="flex items-center">
+                        <UpdateIndicator :image-info="container.imageInfo" />
+                        <div class="font-medium text-gray-900 pl-2">
                             {{ container.name }}
                             <code
                                 class="text-xs bg-gray-100 px-2 py-1 mt-2 rounded text-gray-700"
                             >
                                 {{ container.id.substring(0, 12) }}
                             </code>
+                        </div>
                         </div>
                     </td>
                     <td class="px-6 py-4 text-center">
@@ -89,10 +86,6 @@
                             type="memory"
                         />
                         <div v-else class="text-gray-400 text-sm">N/A</div>
-                    </td>
-                    <!-- T142: Display update indicator -->
-                    <td class="px-6 py-4 text-center">
-                        <UpdateIndicator :image-info="container.imageInfo" />
                     </td>
                     <td class="px-6 py-4 text-center">
                         <router-link
